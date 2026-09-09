@@ -325,6 +325,7 @@ function cambiarCantidad(codigo, cambio) {
     if (!producto) {
         return;
     }
+];
 
     producto.cantidad += cambio;
 
