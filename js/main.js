@@ -185,7 +185,7 @@ if (productContainer) {
         card.classList.add('product-card');
 
         card.innerHTML = `
-            <img 
+            <img
                 src="https://via.placeholder.com/200"
                 alt="${producto.nombre}"
             >
@@ -200,8 +200,8 @@ if (productContainer) {
                 $${producto.precio.toLocaleString('es-CL')} CLP
             </p>
 
-            <button>
-                Añadir al carrito
+            <button onclick="verDetalle('${producto.codigo}')">
+                Ver detalle
             </button>
         `;
 
@@ -212,10 +212,247 @@ if (productContainer) {
 }
 
 
+function verDetalle(codigo) {
+
+    window.location.href = `detalle.html?codigo=${codigo}`;
+
+}
+
+
 const parametros = new URLSearchParams(window.location.search);
 
 const codigo = parametros.get('codigo');
 
-const producto = productos.find((producto) => producto.codigo === codigo);
+const producto = productos.find(
+    (producto) => producto.codigo === codigo
+);
 
-console.log(producto);
+
+const productDetail = document.getElementById('productDetail');
+
+if (productDetail && producto) {
+
+    productDetail.innerHTML = `
+        <img
+            src="https://via.placeholder.com/400"
+            alt="${producto.nombre}"
+        >
+
+        <h2>${producto.nombre}</h2>
+
+        <p class="code">
+            Código: ${producto.codigo}
+        </p>
+
+        <p class="price">
+            $${producto.precio.toLocaleString('es-CL')} CLP
+        </p>
+
+        <button onclick="agregarAlCarrito('${producto.codigo}')">
+            Añadir al carrito
+        </button>
+    `;
+
+}
+
+
+function obtenerCarrito() {
+
+    const carritoGuardado = localStorage.getItem('carrito');
+
+    if (carritoGuardado) {
+        return JSON.parse(carritoGuardado);
+    }
+
+    return [];
+
+}
+
+
+function guardarCarrito(carrito) {
+
+    localStorage.setItem('carrito', JSON.stringify(carrito));
+
+}
+
+
+function agregarAlCarrito(codigo) {
+
+    const producto = productos.find(
+        (producto) => producto.codigo === codigo
+    );
+
+    if (!producto) {
+        return;
+    }
+
+    const carrito = obtenerCarrito();
+
+    const productoExistente = carrito.find(
+        (item) => item.codigo === codigo
+    );
+
+    if (productoExistente) {
+
+        productoExistente.cantidad++;
+
+    } else {
+
+        carrito.push({
+            codigo: producto.codigo,
+            nombre: producto.nombre,
+            precio: producto.precio,
+            cantidad: 1
+        });
+
+    }
+
+    guardarCarrito(carrito);
+
+    alert('Producto agregado al carrito');
+
+}
+
+
+function cambiarCantidad(codigo, cambio) {
+
+    const carrito = obtenerCarrito();
+
+    const producto = carrito.find(
+        (item) => item.codigo === codigo
+    );
+
+    if (!producto) {
+        return;
+    }
+];
+
+    producto.cantidad += cambio;
+
+    if (producto.cantidad <= 0) {
+
+        const nuevoCarrito = carrito.filter(
+            (item) => item.codigo !== codigo
+        );
+
+        guardarCarrito(nuevoCarrito);
+
+    } else {
+
+        guardarCarrito(carrito);
+
+    }
+
+    mostrarCarrito();
+
+}
+
+
+function eliminarDelCarrito(codigo) {
+
+    const carrito = obtenerCarrito();
+
+    const nuevoCarrito = carrito.filter(
+        (item) => item.codigo !== codigo
+    );
+
+    guardarCarrito(nuevoCarrito);
+
+    mostrarCarrito();
+
+}
+
+
+const cartContainer = document.getElementById('cartContainer');
+
+const cartTotal = document.getElementById('cartTotal');
+
+
+function mostrarCarrito() {
+
+    if (!cartContainer) {
+        return;
+    }
+
+    const carrito = obtenerCarrito();
+
+    cartContainer.innerHTML = '';
+
+    if (carrito.length === 0) {
+
+        cartContainer.innerHTML = `
+            <p>Tu carrito está vacío.</p>
+        `;
+
+        if (cartTotal) {
+            cartTotal.innerHTML = '';
+        }
+
+        return;
+    }
+
+
+    carrito.forEach((producto) => {
+
+        const item = document.createElement('article');
+
+        item.classList.add('product-card');
+
+        item.innerHTML = `
+            <h3>${producto.nombre}</h3>
+
+            <p class="code">
+                Código: ${producto.codigo}
+            </p>
+
+            <p class="price">
+                $${producto.precio.toLocaleString('es-CL')} CLP
+            </p>
+
+            <div>
+                <button onclick="cambiarCantidad('${producto.codigo}', -1)">
+                    -
+                </button>
+
+                <span>
+                    Cantidad: ${producto.cantidad}
+                </span>
+
+                <button onclick="cambiarCantidad('${producto.codigo}', 1)">
+                    +
+                </button>
+            </div>
+
+            <br>
+
+            <button onclick="eliminarDelCarrito('${producto.codigo}')">
+                Eliminar
+            </button>
+        `;
+
+        cartContainer.appendChild(item);
+
+    });
+
+
+    const total = carrito.reduce(
+        (suma, producto) =>
+            suma + producto.precio * producto.cantidad,
+        0
+    );
+
+
+    if (cartTotal) {
+
+        cartTotal.innerHTML = `
+            <h3>
+                Total: $${total.toLocaleString('es-CL')} CLP
+            </h3>
+        `;
+
+    }
+
+}
+
+
+mostrarCarrito();
