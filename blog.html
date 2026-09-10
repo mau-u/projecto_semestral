@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pastelería Mil Sabores - Inicio</title>
+    <title>Blog - Pastelería Mil Sabores</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&amp;family=Pacifico&amp;display=swap" rel="stylesheet">
@@ -12,8 +12,8 @@
   <body>
     <header class="main-header">
       <h1>Pastelería Mil Sabores</h1>
-      <p class="tagline">50 años celebrando la dulzura de la vida</p>
-      <nav class="navbar" aria-label="Navegación principal">
+      <p class="tagline">Noticias, recetas e historia</p>
+      <nav class="navbar">
         <ul>
           <li>
             <a href="index.html">Inicio</a>
@@ -43,31 +43,26 @@
       </nav>
     </header>
     <main>
-      <section class="hero-section">
-        <div class="hero-card">
-          <h2>Tradición, calidad y creatividad</h2>
-          <p>Celebramos nuestro 50 aniversario renovando nuestra tienda online para acercar tortas y productos de repostería a más personas.</p>
-          <p>En 1995 colaboramos en la creación de la torta más grande del mundo, un hito que forma parte de nuestra historia.</p>
-          <div class="hero-actions">
-            <a class="link-button" href="productos.html">Ver productos</a>
-            <a class="link-button secondary-link" href="nosotros.html">Conocer nuestra historia</a>
-          </div>
-        </div>
-        <h2>Repostería y decoración</h2>
-        <div class="video-container">
-          <iframe allowfullscreen="" src="https://www.youtube.com/embed/ePR4U1-htgE" title="Video sobre decoración de tortas"></iframe>
-        </div>
-      </section>
-      <section class="catalog-section">
-        <h2>Productos destacados</h2>
-        <p>Una selección de nuestro catálogo.</p>
-        <div class="product-grid" id="featuredProducts">
+      <section class="content-section">
+        <h2>Blog de repostería</h2>
+        <div class="blog-grid">
+          <article class="blog-card">
+            <img src="img/blog-historia.svg" alt="Historia de Pastelería Mil Sabores">
+            <h3>El hito de 1995</h3>
+            <p>Recordamos nuestra participación en la creación de la torta más grande del mundo y lo que significó para nuestra historia.</p>
+            <a class="link-button" href="blog1.html">Leer más</a>
+          </article>
+          <article class="blog-card">
+            <img src="img/blog-consejos.svg" alt="Consejos de repostería">
+            <h3>Consejos para decorar tortas</h3>
+            <p>Ideas sencillas para personalizar una torta y hacer que una celebración sea aún más especial.</p>
+            <a class="link-button" href="blog2.html">Leer más</a>
+          </article>
         </div>
       </section>
     </main>
     <footer class="main-footer">
-      <p>© 2026 Pastelería Mil Sabores - Todos los derechos reservados.</p>
-      <p>Apoyando a estudiantes de gastronomía y a la comunidad local.</p>
+      <p>© 2026 Pastelería Mil Sabores.</p>
     </footer>
     <script src="js/main.js"></script>
   </body>

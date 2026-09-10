@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Usuarios - Mil Sabores</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&amp;family=Pacifico&amp;display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+  </head>
+  <body>
+    <div class="admin-layout">
+      <aside class="admin-menu">
+        <h2>Administrador</h2>
+        <a href="admin.html">Inicio</a>
+        <a href="admin-productos.html">Productos</a>
+        <a href="admin-usuarios.html">Usuarios</a>
+        <a href="registro.html">Nuevo usuario</a>
+        <a href="index.html">Ver tienda</a>
+      </aside>
+      <main class="admin-content">
+        <h1>Usuarios</h1>
+        <p>Los usuarios creados desde Registro se guardan en localStorage y aparecen aquí.</p>
+        <a class="link-button" href="registro.html">Crear nuevo usuario</a>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>
+                  RUN
+                </th>
+                <th>
+                  Nombre
+                </th>
+                <th>
+                  Correo
+                </th>
+                <th>
+                  Rol
+                </th>
+                <th>
+                  Acción
+                </th>
+              </tr>
+            </thead>
+            <tbody id="adminUsersBody">
+            </tbody>
+          </table>
+        </div>
+      </main>
+    </div>
+    <script src="js/main.js"></script>
+  </body>
+</html>
