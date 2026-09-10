@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administrador - Mil Sabores</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&amp;family=Pacifico&amp;display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+  </head>
+  <body>
+    <div class="admin-layout">
+      <aside class="admin-menu">
+        <h2>Administrador</h2>
+        <a href="admin.html">Inicio</a>
+        <a href="admin-productos.html">Productos</a>
+        <a href="admin-usuarios.html">Usuarios</a>
+        <a href="index.html">Ver tienda</a>
+        <a href="#" onclick="cerrarSesion(); return false;">Cerrar sesión</a>
+      </aside>
+      <main class="admin-content">
+        <h1>Panel de administración</h1>
+        <div class="content-card">
+          <h3>Bienvenido</h3>
+          <p>Desde este panel se pueden demostrar las vistas de gestión de productos y usuarios solicitadas para la entrega.</p>
+          <div class="hero-actions">
+            <a class="link-button" href="admin-productos.html">Gestionar productos</a>
+            <a class="link-button secondary-link" href="admin-usuarios.html">Gestionar usuarios</a>
+          </div>
+        </div>
+      </main>
+    </div>
+    <script src="js/main.js"></script>
+  </body>
+</html>

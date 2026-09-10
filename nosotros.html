@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Productos - Pastelería Mil Sabores</title>
+    <title>Nosotros - Pastelería Mil Sabores</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&amp;family=Pacifico&amp;display=swap" rel="stylesheet">
@@ -12,7 +12,7 @@
   <body>
     <header class="main-header">
       <h1>Pastelería Mil Sabores</h1>
-      <p class="tagline">50 años celebrando la dulzura de la vida</p>
+      <p class="tagline">Nuestra historia</p>
       <nav class="navbar">
         <ul>
           <li>
@@ -43,29 +43,28 @@
       </nav>
     </header>
     <main>
-      <section class="catalog-section">
-        <h2>Catálogo de productos</h2>
-        <p>Busca por nombre o filtra por categoría.</p>
-        <div class="filters">
-          <div>
-            <label for="searchProduct">Buscar producto</label>
-            <input id="searchProduct" type="search" placeholder="Ej: chocolate o TC001">
-          </div>
-          <div>
-            <label for="categoryFilter">Categoría</label>
-            <select id="categoryFilter">
-              <option value="Todas">Todas</option>
-            </select>
-          </div>
-        </div>
-        <p hidden="" id="sinResultados">No se encontraron productos.</p>
-        <div class="product-grid" id="productContainer">
-        </div>
+      <section class="content-section">
+        <h2>Sobre Pastelería Mil Sabores</h2>
+        <article class="content-card">
+          <h3>50 años de tradición</h3>
+          <p>Pastelería Mil Sabores celebra su 50 aniversario como un referente en la repostería chilena. En 1995 participó en la creación de la torta más grande del mundo, hito que forma parte de su historia.</p>
+        </article>
+        <article class="content-card">
+          <h3>Misión</h3>
+          <p>Ofrecer una experiencia dulce y memorable con tortas y productos de repostería de alta calidad para todas las ocasiones, celebrando nuestras raíces históricas y fomentando la creatividad.</p>
+        </article>
+        <article class="content-card">
+          <h3>Visión</h3>
+          <p>Convertirnos en una tienda online líder de productos de repostería en Chile, reconocida por innovación, calidad e impacto positivo en la comunidad y en la formación de nuevos talentos gastronómicos.</p>
+        </article>
+        <article class="content-card">
+          <h3>Equipo desarrollador</h3>
+          <p>Proyecto académico desarrollado colaborativamente por el equipo de Desarrollo Fullstack II.</p>
+        </article>
       </section>
     </main>
     <footer class="main-footer">
       <p>© 2026 Pastelería Mil Sabores.</p>
-      <p>Calidad y tradición en repostería.</p>
     </footer>
     <script src="js/main.js"></script>
   </body>
