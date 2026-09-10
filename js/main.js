@@ -4,7 +4,7 @@ const productos = [
     categoria: "Tortas Cuadradas",
     nombre: "Torta Cuadrada de Chocolate",
     precio: 45000,
-    imagen: "img/TC001.svg",
+    imagen: "img/TC001.jpg",
     descripcion: "Deliciosa torta de chocolate con capas de ganache y un toque de avellanas. Personalizable con mensajes especiales."
   },
   {
@@ -12,7 +12,7 @@ const productos = [
     categoria: "Tortas Cuadradas",
     nombre: "Torta Cuadrada de Frutas",
     precio: 50000,
-    imagen: "img/TC002.svg",
+    imagen: "img/TC002.jpg",
     descripcion: "Una mezcla de frutas frescas y crema chantilly sobre un suave bizcocho de vainilla, ideal para celebraciones."
   },
   {
@@ -20,7 +20,7 @@ const productos = [
     categoria: "Tortas Circulares",
     nombre: "Torta Circular de Vainilla",
     precio: 40000,
-    imagen: "img/TT001.svg",
+    imagen: "img/TT001.jpg",
     descripcion: "Bizcocho de vainilla clásico relleno con crema pastelera y cubierto con un glaseado dulce, perfecto para cualquier ocasión."
   },
   {
@@ -28,7 +28,7 @@ const productos = [
     categoria: "Tortas Circulares",
     nombre: "Torta Circular de Manjar",
     precio: 42000,
-    imagen: "img/TT002.svg",
+    imagen: "img/TT002.jpg",
     descripcion: "Torta tradicional chilena con manjar y nueces, un deleite para los amantes de los sabores dulces y clásicos."
   },
   {
@@ -36,7 +36,7 @@ const productos = [
     categoria: "Postres Individuales",
     nombre: "Mousse de Chocolate",
     precio: 5000,
-    imagen: "img/PI001.svg",
+    imagen: "img/PI001.jpg",
     descripcion: "Postre individual cremoso y suave, hecho con chocolate de alta calidad, ideal para los amantes del chocolate."
   },
   {
@@ -44,7 +44,7 @@ const productos = [
     categoria: "Postres Individuales",
     nombre: "Tiramisú Clásico",
     precio: 5500,
-    imagen: "img/PI002.svg",
+    imagen: "img/PI002.jpg",
     descripcion: "Un postre italiano individual con capas de café, mascarpone y cacao, perfecto para finalizar cualquier comida."
   },
   {
@@ -52,7 +52,7 @@ const productos = [
     categoria: "Productos Sin Azúcar",
     nombre: "Torta Sin Azúcar de Naranja",
     precio: 48000,
-    imagen: "img/PSA001.svg",
+    imagen: "img/PSA001.jpg",
     descripcion: "Torta ligera y deliciosa, endulzada naturalmente, ideal para quienes buscan opciones más saludables."
   },
   {
@@ -60,7 +60,7 @@ const productos = [
     categoria: "Productos Sin Azúcar",
     nombre: "Cheesecake Sin Azúcar",
     precio: 47000,
-    imagen: "img/PSA002.svg",
+    imagen: "img/PSA002.jpg",
     descripcion: "Suave y cremoso, este cheesecake es una opción perfecta para disfrutar sin culpa."
   },
   {
@@ -68,7 +68,7 @@ const productos = [
     categoria: "Pastelería Tradicional",
     nombre: "Empanada de Manzana",
     precio: 3000,
-    imagen: "img/PT001.svg",
+    imagen: "img/PT001.jpg",
     descripcion: "Pastelería tradicional rellena de manzanas especiadas, perfecta para un dulce desayuno o merienda."
   },
   {
@@ -76,7 +76,7 @@ const productos = [
     categoria: "Pastelería Tradicional",
     nombre: "Tarta de Santiago",
     precio: 6000,
-    imagen: "img/PT002.svg",
+    imagen: "img/PT002.jpg",
     descripcion: "Tradicional tarta española hecha con almendras, azúcar y huevos, una delicia para los amantes de los postres clásicos."
   },
   {
@@ -84,7 +84,7 @@ const productos = [
     categoria: "Productos Sin Gluten",
     nombre: "Brownie Sin Gluten",
     precio: 4000,
-    imagen: "img/PG001.svg",
+    imagen: "img/PG001.jpg",
     descripcion: "Rico y denso, este brownie es perfecto para quienes necesitan evitar el gluten sin sacrificar el sabor."
   },
   {
@@ -92,7 +92,7 @@ const productos = [
     categoria: "Productos Sin Gluten",
     nombre: "Pan Sin Gluten",
     precio: 3500,
-    imagen: "img/PG002.svg",
+    imagen: "img/PG002.jpg",
     descripcion: "Suave y esponjoso, ideal para sándwiches o para acompañar cualquier comida."
   },
   {
@@ -100,7 +100,7 @@ const productos = [
     categoria: "Productos Vegana",
     nombre: "Torta Vegana de Chocolate",
     precio: 50000,
-    imagen: "img/PV001.svg",
+    imagen: "img/PV001.jpg",
     descripcion: "Torta de chocolate húmeda y deliciosa, hecha sin productos de origen animal, perfecta para veganos."
   },
   {
@@ -108,7 +108,7 @@ const productos = [
     categoria: "Productos Vegana",
     nombre: "Galletas Veganas de Avena",
     precio: 4500,
-    imagen: "img/PV002.svg",
+    imagen: "img/PV002.jpg",
     descripcion: "Crujientes y sabrosas, estas galletas son una excelente opción para un snack saludable y vegano."
   },
   {
@@ -116,7 +116,7 @@ const productos = [
     categoria: "Tortas Especiales",
     nombre: "Torta Especial de Cumpleaños",
     precio: 55000,
-    imagen: "img/TE001.svg",
+    imagen: "img/TE001.jpg",
     descripcion: "Diseñada especialmente para celebraciones, personalizable con decoraciones y mensajes únicos."
   },
   {
@@ -124,7 +124,7 @@ const productos = [
     categoria: "Tortas Especiales",
     nombre: "Torta Especial de Boda",
     precio: 60000,
-    imagen: "img/TE002.svg",
+    imagen: "img/TE002.jpg",
     descripcion: "Elegante y deliciosa, esta torta está diseñada para ser el centro de atención en cualquier boda."
   }
 ];
