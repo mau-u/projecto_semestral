@@ -3,6 +3,8 @@ import React, { useState } from 'react';
 
 import { formatPrice } from '../../utils/format.js';
 
+const baseUrl = import.meta.env?.BASE_URL ?? '/';
+
 
 // ========================================
 // FORMULARIO INICIAL DEL PRODUCTO
@@ -14,7 +16,7 @@ const blankForm = {
   categoria: '',
   precio: '',
   stock: '',
-  imagen: '/img/TC001.jpg',
+  imagen: `${baseUrl}img/TC001.jpg`,
   descripcion: '',
   isOffer: false,
   descuento: 0
@@ -361,7 +363,7 @@ export default function AdminProducts({
                     name="imagen"
                     value={form.imagen}
                     onChange={change}
-                    placeholder="/img/TC001.jpg"
+                    placeholder={`${baseUrl}img/TC001.jpg`}
                   />
                 </label>
               </div>

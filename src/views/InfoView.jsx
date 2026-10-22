@@ -2,6 +2,8 @@
 import React, { useState } from 'react';
 import SectionHeading from '../components/SectionHeading.jsx';
 
+const baseUrl = import.meta.env?.BASE_URL ?? '/';
+
 
 // ========================================
 // VISTA: NOSOTROS
@@ -18,7 +20,7 @@ export function AboutView() {
 
       <div className="about-grid">
         <img
-          src="/img/TT002.jpg"
+          src={`${baseUrl}img/TT002.jpg`}
           alt="Torta tradicional de manjar"
         />
 
@@ -69,13 +71,13 @@ export function BlogView() {
           {
             title: 'La historia detrás de nuestra torta de manjar',
             text: 'Una receta clásica que nos acompaña desde los primeros años.',
-            img: '/img/blog-historia.jpg',
+            img: `${baseUrl}img/blog-historia.jpg`,
             slug: 'historia'
           },
           {
             title: 'Cómo conservar tus tortas en casa',
             text: 'Algunos consejos sencillos para disfrutar cada porción como recién preparada.',
-            img: '/img/blog-consejos.jpg',
+            img: `${baseUrl}img/blog-consejos.jpg`,
             slug: 'consejos'
           }
         ].map((post) => (
@@ -135,8 +137,8 @@ export function BlogDetailView({ slug }) {
         <img
           src={
             isHistory
-              ? '/img/blog-historia.jpg'
-              : '/img/blog-consejos.jpg'
+              ? `${baseUrl}img/blog-historia.jpg`
+              : `${baseUrl}img/blog-consejos.jpg`
           }
           alt=""
         />

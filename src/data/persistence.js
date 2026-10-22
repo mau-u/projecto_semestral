@@ -3,7 +3,20 @@ import { initialCategories, initialProducts, initialUsers } from './products.js'
 const clone = (value) => JSON.parse(JSON.stringify(value));
 const createId = () => `ms-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
 
-export function createRepository({ key, initialData = [], storage = globalThis.localStorage, idField = 'id' }) {
+const normalizeStoredAssetPaths = (items) => {
+  const baseUrl = import.meta.env?.BASE_URL ?? '/';
+  return items.map((item) => {
+    if (!item || typeof item !== 'object' || typeof item.imagen !== 'string') return item;
+
+    // Migrate image paths saved before deployment under '/', or under the
+    // previous (misspelled) project path. Leave data URLs and external URLs intact.
+    const match = item.imagen.match(/^\/?(?:(?:proyecto|projecto)_semestral\/)?img\/(.+)$/i);
+    if (!match) return item;
+    return { ...item, imagen: `${baseUrl}img/${match[1]}` };
+  });
+};
+
+export function createRepository({ key, initialData = [], storage = globalThis.localStorage, idField = 'id', normalize = (items) => items }) {
   const read = () => {
     try {
       const saved = storage?.getItem(key);
@@ -13,7 +26,17 @@ export function createRepository({ key, initialData = [], storage = globalThis.l
         return seed;
       }
       const value = JSON.parse(saved);
-      return Array.isArray(value) ? value : clone(initialData);
+      if (!Array.isArray(value)) return clone(initialData);
+      const normalized = normalize(value);
+      // Persist migrations when possible, but never fail rendering if storage is read-only.
+      if (JSON.stringify(normalized) !== JSON.stringify(value)) {
+        try {
+          storage?.setItem(key, JSON.stringify(normalized));
+        } catch {
+          // The normalized values are still returned for this session.
+        }
+      }
+      return normalized;
     } catch {
       return clone(initialData);
     }
@@ -56,9 +79,9 @@ export function createRepository({ key, initialData = [], storage = globalThis.l
   };
 }
 
-export const productsRepository = createRepository({ key: 'mil-sabores.products.v1', initialData: initialProducts, idField: 'codigo' });
+export const productsRepository = createRepository({ key: 'mil-sabores.products.v1', initialData: initialProducts, idField: 'codigo', normalize: normalizeStoredAssetPaths });
 export const categoriesRepository = createRepository({ key: 'mil-sabores.categories.v1', initialData: initialCategories });
-export const cartRepository = createRepository({ key: 'mil-sabores.cart.v1' });
+export const cartRepository = createRepository({ key: 'mil-sabores.cart.v1', normalize: normalizeStoredAssetPaths });
 export const ordersRepository = createRepository({ key: 'mil-sabores.orders.v1' });
 export const usersRepository = createRepository({ key: 'mil-sabores.users.v1', initialData: initialUsers, idField: 'id' });
 export const auditRepository = createRepository({ key: 'mil-sabores.audit.v1' });

@@ -4,6 +4,8 @@ import React from 'react';
 import ProductCard from '../components/ProductCard.jsx';
 import SectionHeading from '../components/SectionHeading.jsx';
 
+const baseUrl = import.meta.env?.BASE_URL ?? '/';
+
 
 export default function HomeView({
   products,
@@ -79,7 +81,7 @@ export default function HomeView({
           >
             <div className="hero-photo">
               <img
-                src="/img/TC001.jpg"
+                src={`${baseUrl}img/TC001.jpg`}
                 alt="Torta de chocolate de Mil Sabores"
               />
             </div>
@@ -155,11 +157,11 @@ export default function HomeView({
             controls
             playsInline
             preload="metadata"
-            poster="/img/TC001.jpg"
+            poster={`${baseUrl}img/TC001.jpg`}
             aria-label="Preparación artesanal de pastelería"
           >
             <source
-              src="/video/pasteleria.mp4"
+              src={`${baseUrl}video/pasteleria.mp4`}
               type="video/mp4"
             />
 
@@ -274,7 +276,7 @@ export default function HomeView({
 
         <div className="story-art">
           <img
-            src="/img/TT002.jpg"
+            src={`${baseUrl}img/TT002.jpg`}
             alt="Torta tradicional de manjar"
             loading="lazy"
           />
