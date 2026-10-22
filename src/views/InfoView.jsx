@@ -1,20 +1,278 @@
+
 import React, { useState } from 'react';
 import SectionHeading from '../components/SectionHeading.jsx';
 
+
+// ========================================
+// VISTA: NOSOTROS
+// ========================================
+
 export function AboutView() {
-  return <main className="container content-section info-page"><SectionHeading eyebrow="Desde 1975" title="Una historia horneada en familia" description="Nacimos con una idea sencilla: compartir preparaciones ricas, hechas con tiempo y buenos ingredientes." /><div className="about-grid"><img src="/img/TT002.jpg" alt="Torta tradicional de manjar" /><div><h2>50 años celebrando la dulzura</h2><p>En Mil Sabores cada receta guarda una historia. Partimos como una pequeña pastelería de barrio y crecimos acompañando cumpleaños, reuniones y tardes en familia.</p><p>Hoy mezclamos la tradición de nuestras recetas con nuevas alternativas para que todos encuentren algo que disfrutar.</p><a className="btn btn-brand" href="#/productos">Conocer el catálogo</a></div></div></main>;
+  return (
+    <main className="container content-section info-page">
+      <SectionHeading
+        eyebrow="Desde 1975"
+        title="Una historia horneada en familia"
+        description="Nacimos con una idea sencilla: compartir preparaciones ricas, hechas con tiempo y buenos ingredientes."
+      />
+
+      <div className="about-grid">
+        <img
+          src="/img/TT002.jpg"
+          alt="Torta tradicional de manjar"
+        />
+
+        <div>
+          <h2>50 años celebrando la dulzura</h2>
+
+          <p>
+            En Mil Sabores cada receta guarda una historia.
+            Partimos como una pequeña pastelería de barrio y
+            crecimos acompañando cumpleaños, reuniones y
+            tardes en familia.
+          </p>
+
+          <p>
+            Hoy mezclamos la tradición de nuestras recetas
+            con nuevas alternativas para que todos encuentren
+            algo que disfrutar.
+          </p>
+
+          <a
+            className="btn btn-brand"
+            href="#/productos"
+          >
+            Conocer el catálogo
+          </a>
+        </div>
+      </div>
+    </main>
+  );
 }
 
+
+// ========================================
+// VISTA: BLOG
+// ========================================
+
 export function BlogView() {
-  return <main className="container content-section info-page"><SectionHeading eyebrow="Cuaderno de la pastelería" title="Historias y consejos dulces" description="Ideas, recetas y recuerdos de nuestra cocina." /><div className="row g-4">{[{ title: 'La historia detrás de nuestra torta de manjar', text: 'Una receta clásica que nos acompaña desde los primeros años.', img: '/img/blog-historia.jpg', slug: 'historia' }, { title: 'Cómo conservar tus tortas en casa', text: 'Algunos consejos sencillos para disfrutar cada porción como recién preparada.', img: '/img/blog-consejos.jpg', slug: 'consejos' }].map((post) => <div key={post.slug} className="col-md-6"><article className="blog-card"><img src={post.img} alt="" loading="lazy" /><div><p className="eyebrow">Consejos de la casa</p><h2>{post.title}</h2><p>{post.text}</p><a className="text-link" href={`#/blog/${post.slug}`}>Leer artículo <span>→</span></a></div></article></div>)}</div></main>;
+  return (
+    <main className="container content-section info-page">
+      <SectionHeading
+        eyebrow="Cuaderno de la pastelería"
+        title="Historias y consejos dulces"
+        description="Ideas, recetas y recuerdos de nuestra cocina."
+      />
+
+      <div className="row g-4">
+        {[
+          {
+            title: 'La historia detrás de nuestra torta de manjar',
+            text: 'Una receta clásica que nos acompaña desde los primeros años.',
+            img: '/img/blog-historia.jpg',
+            slug: 'historia'
+          },
+          {
+            title: 'Cómo conservar tus tortas en casa',
+            text: 'Algunos consejos sencillos para disfrutar cada porción como recién preparada.',
+            img: '/img/blog-consejos.jpg',
+            slug: 'consejos'
+          }
+        ].map((post) => (
+          <div
+            key={post.slug}
+            className="col-md-6"
+          >
+            <article className="blog-card">
+              <img
+                src={post.img}
+                alt=""
+                loading="lazy"
+              />
+
+              <div>
+                <p className="eyebrow">
+                  Consejos de la casa
+                </p>
+
+                <h2>{post.title}</h2>
+
+                <p>{post.text}</p>
+
+                <a
+                  className="text-link"
+                  href={`#/blog/${post.slug}`}
+                >
+                  Leer artículo <span>→</span>
+                </a>
+              </div>
+            </article>
+          </div>
+        ))}
+      </div>
+    </main>
+  );
 }
+
+
+// ========================================
+// VISTA: DETALLE DEL ARTÍCULO
+// ========================================
 
 export function BlogDetailView({ slug }) {
   const isHistory = slug === 'historia';
-  return <main className="container content-section info-page"><a className="breadcrumb-link" href="#/blog">← Volver al blog</a><article className="article-page"><img src={isHistory ? '/img/blog-historia.jpg' : '/img/blog-consejos.jpg'} alt="" /><p className="eyebrow">{isHistory ? 'Nuestra historia' : 'Consejos de la casa'}</p><h1>{isHistory ? 'Una torta de manjar que reúne generaciones' : 'Cómo conservar tus tortas para disfrutarlas mejor'}</h1><p>{isHistory ? 'La torta de manjar se convirtió en una de las favoritas de nuestros clientes. Su bizcocho suave, el relleno generoso y el toque de nueces nos recuerdan que las recetas sencillas también pueden ser inolvidables.' : 'Guarda la torta en un recipiente cerrado dentro del refrigerador y sácala unos minutos antes de servir. Así recupera su textura y aroma. Para postres individuales, conserva cada porción protegida y evita congelar preparaciones con crema.'}</p><p>En Mil Sabores preparamos nuestros productos frescos cada día y recomendamos compartirlos con quienes más quieres.</p><a className="btn btn-brand" href="#/productos">Explorar la tienda</a></article></main>;
+
+  return (
+    <main className="container content-section info-page">
+      <a
+        className="breadcrumb-link"
+        href="#/blog"
+      >
+        ← Volver al blog
+      </a>
+
+      <article className="article-page">
+        <img
+          src={
+            isHistory
+              ? '/img/blog-historia.jpg'
+              : '/img/blog-consejos.jpg'
+          }
+          alt=""
+        />
+
+        <p className="eyebrow">
+          {isHistory
+            ? 'Nuestra historia'
+            : 'Consejos de la casa'}
+        </p>
+
+        <h1>
+          {isHistory
+            ? 'Una torta de manjar que reúne generaciones'
+            : 'Cómo conservar tus tortas para disfrutarlas mejor'}
+        </h1>
+
+        <p>
+          {isHistory
+            ? 'La torta de manjar se convirtió en una de las favoritas de nuestros clientes. Su bizcocho suave, el relleno generoso y el toque de nueces nos recuerdan que las recetas sencillas también pueden ser inolvidables.'
+            : 'Guarda la torta en un recipiente cerrado dentro del refrigerador y sácala unos minutos antes de servir. Así recupera su textura y aroma. Para postres individuales, conserva cada porción protegida y evita congelar preparaciones con crema.'}
+        </p>
+
+        <p>
+          En Mil Sabores preparamos nuestros productos
+          frescos cada día y recomendamos compartirlos con
+          quienes más quieres.
+        </p>
+
+        <a
+          className="btn btn-brand"
+          href="#/productos"
+        >
+          Explorar la tienda
+        </a>
+      </article>
+    </main>
+  );
 }
+
+
+// ========================================
+// VISTA: CONTACTO
+// ========================================
 
 export function ContactView() {
   const [sent, setSent] = useState(false);
-  return <main className="container content-section info-page"><SectionHeading eyebrow="Estamos para ayudarte" title="Hablemos" description="Déjanos un mensaje y te responderemos pronto." /><div className="contact-layout"><div className="contact-details"><h2>Visítanos</h2><p>Av. Providencia 1234<br />Providencia, Santiago</p><p>Martes a domingo<br />09:00 a 20:00</p><p>hola@milsabores.cl<br />+56 2 2345 6789</p></div><form className="contact-form" onSubmit={(event) => { event.preventDefault(); setSent(true); }}><label className="form-label">Nombre<input required className="form-control" /></label><label className="form-label">Correo electrónico<input required type="email" className="form-control" /></label><label className="form-label">Mensaje<textarea required className="form-control" rows="5" /></label><button className="btn btn-brand" type="submit">Enviar mensaje</button>{sent && <p className="form-success" role="status">Gracias. Guardamos tu mensaje de demostración.</p>}</form></div></main>;
+
+  return (
+    <main className="container content-section info-page">
+      <SectionHeading
+        eyebrow="Estamos para ayudarte"
+        title="Hablemos"
+        description="Déjanos un mensaje y te responderemos pronto."
+      />
+
+      <div className="contact-layout">
+
+        {/* Información de contacto */}
+        <div className="contact-details">
+          <h2>Visítanos</h2>
+
+          <p>
+            Av. Providencia 1234
+            <br />
+            Providencia, Santiago
+          </p>
+
+          <p>
+            Martes a domingo
+            <br />
+            09:00 a 20:00
+          </p>
+
+          <p>
+            hola@milsabores.cl
+            <br />
+            +56 2 2345 6789
+          </p>
+        </div>
+
+
+        {/* Formulario de contacto */}
+        <form
+          className="contact-form"
+          onSubmit={(event) => {
+            event.preventDefault();
+            setSent(true);
+          }}
+        >
+          <label className="form-label">
+            Nombre
+
+            <input
+              required
+              className="form-control"
+            />
+          </label>
+
+          <label className="form-label">
+            Correo electrónico
+
+            <input
+              required
+              type="email"
+              className="form-control"
+            />
+          </label>
+
+          <label className="form-label">
+            Mensaje
+
+            <textarea
+              required
+              className="form-control"
+              rows="5"
+            />
+          </label>
+
+          <button
+            className="btn btn-brand"
+            type="submit"
+          >
+            Enviar mensaje
+          </button>
+
+          {sent && (
+            <p
+              className="form-success"
+              role="status"
+            >
+              Gracias. Guardamos tu mensaje de demostración.
+            </p>
+          )}
+        </form>
+
+      </div>
+    </main>
+  );
 }

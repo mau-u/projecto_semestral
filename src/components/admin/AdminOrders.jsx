@@ -1,8 +1,316 @@
+
 import React, { useState } from 'react';
-import { formatDate, formatPrice } from '../../utils/format.js';
+
+import {
+  formatDate,
+  formatPrice
+} from '../../utils/format.js';
+
+
+// ========================================
+// COMPONENTE: ADMINISTRACIÓN DE ÓRDENES
+// ========================================
 
 export default function AdminOrders({ orders }) {
   const [selected, setSelected] = useState(null);
-  const order = orders.find((item) => item.id === selected);
-  return <><div className="admin-page-heading"><div><p className="eyebrow">Ventas</p><h1>Órdenes y boletas</h1><p>Historial de compras realizadas en la demostración.</p></div></div>{order && <section className="admin-panel invoice-panel"><div className="admin-panel-heading"><div><p className="eyebrow">Resumen de compra</p><h2>Boleta {order.id}</h2></div><button className="btn btn-sm btn-outline-secondary" onClick={() => setSelected(null)}>Cerrar</button></div><div className="invoice-meta"><span>{order.customer.name}<small>{order.customer.email}</small></span><span>{formatDate(order.createdAt)}<small>{order.delivery === 'retiro' ? 'Retiro en tienda' : order.address}</small></span><span className={`status-chip ${order.status}`}>{order.status === 'paid' ? 'Pagada' : 'Pago rechazado'}</span></div><div className="admin-table-wrap"><table className="admin-table"><thead><tr><th>Producto</th><th>Código</th><th>Cantidad</th><th>Subtotal</th></tr></thead><tbody>{order.items.map((item) => <tr key={`${item.codigo}-${item.mensaje || ''}`}><td>{item.nombre}{item.mensaje && <small className="d-block">Mensaje: {item.mensaje}</small>}</td><td>{item.codigo}</td><td>{item.cantidad}</td><td>{formatPrice(item.precio * item.cantidad)}</td></tr>)}</tbody></table></div><div className="invoice-breakdown"><div><span>Subtotal</span><strong>{formatPrice(order.subtotal)}</strong></div>{(order.discounts || []).map((discount) => <div className="discount-row" key={discount.code}><span>{discount.label}</span><strong>−{formatPrice(discount.amount)}</strong></div>)}<div><span>Entrega</span><strong>{order.shipping ? formatPrice(order.shipping) : 'Gratis'}</strong></div></div><div className="invoice-total"><span>{order.status === 'paid' ? 'Total pagado' : 'Total del pedido'}</span><strong>{formatPrice(order.total)}</strong></div><div className="audit-timeline"><strong>Auditoría del pedido</strong>{(order.auditTrail || []).map((event, index) => <p key={`${event.type}-${index}`}>{formatDate(event.at)} · {event.type === 'order.created' ? 'Pedido registrado' : event.type === 'discount.applied' ? `${event.label} (−${formatPrice(event.amount)})` : event.type === 'payment.approved' ? 'Pago aprobado' : 'Pago rechazado'}</p>)}</div></section>}<section className="admin-panel"><div className="admin-panel-heading"><div><h2>Órdenes registradas <span className="count-chip">{orders.length}</span></h2></div></div>{orders.length ? <div className="admin-table-wrap"><table className="admin-table"><thead><tr><th>Pedido</th><th>Fecha</th><th>Cliente</th><th>Total</th><th>Estado</th><th>Acción</th></tr></thead><tbody>{[...orders].reverse().map((item) => <tr key={item.id}><td>{item.id}</td><td>{formatDate(item.createdAt)}</td><td>{item.customer.name}<small className="d-block">{item.customer.email}</small></td><td>{formatPrice(item.total)}</td><td><span className={`status-chip ${item.status}`}>{item.status === 'paid' ? 'Pagada' : 'Rechazada'}</span></td><td><button className="table-action" onClick={() => setSelected(item.id)}>Mostrar boleta</button></td></tr>)}</tbody></table></div> : <p className="admin-empty">Todavía no hay órdenes. Completa una compra de demostración para verla aquí.</p>}</section></>;
+
+  // Buscamos la orden seleccionada por su identificador
+  const order = orders.find(
+    (item) => item.id === selected
+  );
+
+
+  return (
+    <>
+      {/* Encabezado de la página */}
+      <div className="admin-page-heading">
+        <div>
+          <p className="eyebrow">Ventas</p>
+
+          <h1>Órdenes y boletas</h1>
+
+          <p>
+            Historial de compras realizadas en la demostración.
+          </p>
+        </div>
+      </div>
+
+
+      {/* Detalle de la boleta seleccionada */}
+      {order && (
+        <section className="admin-panel invoice-panel">
+
+          <div className="admin-panel-heading">
+            <div>
+              <p className="eyebrow">
+                Resumen de compra
+              </p>
+
+              <h2>Boleta {order.id}</h2>
+            </div>
+
+            <button
+              className="btn btn-sm btn-outline-secondary"
+              onClick={() => setSelected(null)}
+            >
+              Cerrar
+            </button>
+          </div>
+
+
+          {/* Información del cliente, fecha y estado */}
+          <div className="invoice-meta">
+
+            <span>
+              {order.customer.name}
+
+              <small>
+                {order.customer.email}
+              </small>
+            </span>
+
+
+            <span>
+              {formatDate(order.createdAt)}
+
+              <small>
+                {order.delivery === 'retiro'
+                  ? 'Retiro en tienda'
+                  : order.address}
+              </small>
+            </span>
+
+
+            <span
+              className={`status-chip ${order.status}`}
+            >
+              {order.status === 'paid'
+                ? 'Pagada'
+                : 'Pago rechazado'}
+            </span>
+
+          </div>
+
+
+          {/* Tabla de productos de la orden */}
+          <div className="admin-table-wrap">
+            <table className="admin-table">
+
+              <thead>
+                <tr>
+                  <th>Producto</th>
+                  <th>Código</th>
+                  <th>Cantidad</th>
+                  <th>Subtotal</th>
+                </tr>
+              </thead>
+
+
+              <tbody>
+                {order.items.map((item) => (
+                  <tr
+                    key={`${item.codigo}-${item.mensaje || ''}`}
+                  >
+                    <td>
+                      {item.nombre}
+
+                      {item.mensaje && (
+                        <small className="d-block">
+                          Mensaje: {item.mensaje}
+                        </small>
+                      )}
+                    </td>
+
+                    <td>{item.codigo}</td>
+
+                    <td>{item.cantidad}</td>
+
+                    <td>
+                      {formatPrice(
+                        item.precio * item.cantidad
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+
+            </table>
+          </div>
+
+
+          {/* Subtotal y descuentos */}
+          <div className="invoice-breakdown">
+
+            <div>
+              <span>Subtotal</span>
+
+              <strong>
+                {formatPrice(order.subtotal)}
+              </strong>
+            </div>
+
+
+            {(order.discounts || []).map((discount) => (
+              <div
+                className="discount-row"
+                key={discount.code}
+              >
+                <span>{discount.label}</span>
+
+                <strong>
+                  −{formatPrice(discount.amount)}
+                </strong>
+              </div>
+            ))}
+
+
+            <div>
+              <span>Entrega</span>
+
+              <strong>
+                {order.shipping
+                  ? formatPrice(order.shipping)
+                  : 'Gratis'}
+              </strong>
+            </div>
+
+          </div>
+
+
+          {/* Total de la orden */}
+          <div className="invoice-total">
+            <span>
+              {order.status === 'paid'
+                ? 'Total pagado'
+                : 'Total del pedido'}
+            </span>
+
+            <strong>
+              {formatPrice(order.total)}
+            </strong>
+          </div>
+
+
+          {/* Historial de eventos de la orden */}
+          <div className="audit-timeline">
+            <strong>Auditoría del pedido</strong>
+
+            {(order.auditTrail || []).map(
+              (event, index) => (
+                <p
+                  key={`${event.type}-${index}`}
+                >
+                  {formatDate(event.at)}
+                  {' · '}
+
+                  {event.type === 'order.created'
+                    ? 'Pedido registrado'
+                    : event.type === 'discount.applied'
+                      ? `${event.label} (−${formatPrice(
+                          event.amount
+                        )})`
+                      : event.type === 'payment.approved'
+                        ? 'Pago aprobado'
+                        : 'Pago rechazado'}
+                </p>
+              )
+            )}
+          </div>
+
+        </section>
+      )}
+
+
+      {/* Tabla general de órdenes registradas */}
+      <section className="admin-panel">
+
+        <div className="admin-panel-heading">
+          <div>
+            <h2>
+              Órdenes registradas{' '}
+
+              <span className="count-chip">
+                {orders.length}
+              </span>
+            </h2>
+          </div>
+        </div>
+
+
+        {/* Mostramos las órdenes o un mensaje vacío */}
+        {orders.length ? (
+          <div className="admin-table-wrap">
+            <table className="admin-table">
+
+              <thead>
+                <tr>
+                  <th>Pedido</th>
+                  <th>Fecha</th>
+                  <th>Cliente</th>
+                  <th>Total</th>
+                  <th>Estado</th>
+                  <th>Acción</th>
+                </tr>
+              </thead>
+
+
+              <tbody>
+                {[...orders].reverse().map((item) => (
+                  <tr key={item.id}>
+
+                    <td>{item.id}</td>
+
+                    <td>
+                      {formatDate(item.createdAt)}
+                    </td>
+
+                    <td>
+                      {item.customer.name}
+
+                      <small className="d-block">
+                        {item.customer.email}
+                      </small>
+                    </td>
+
+                    <td>
+                      {formatPrice(item.total)}
+                    </td>
+
+                    <td>
+                      <span
+                        className={`status-chip ${item.status}`}
+                      >
+                        {item.status === 'paid'
+                          ? 'Pagada'
+                          : 'Rechazada'}
+                      </span>
+                    </td>
+
+                    <td>
+                      <button
+                        className="table-action"
+                        onClick={() =>
+                          setSelected(item.id)
+                        }
+                      >
+                        Mostrar boleta
+                      </button>
+                    </td>
+
+                  </tr>
+                ))}
+              </tbody>
+
+            </table>
+          </div>
+        ) : (
+          <p className="admin-empty">
+            Todavía no hay órdenes. Completa una compra
+            de demostración para verla aquí.
+          </p>
+        )}
+
+      </section>
+    </>
+  );
 }
