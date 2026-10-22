@@ -1,0 +1,15 @@
+CAMBIOS PRINCIPALES
+- Navegación funcional entre páginas.
+- Catálogo dinámico con 16 productos oficiales del caso.
+- Filtro por categoría y buscador.
+- Detalle con descripción y mensaje personalizado en tortas.
+- Carrito con localStorage, cantidades, eliminar y total.
+- Registro con validaciones JS, RUN, región/comuna y beneficios del caso.
+- Contacto con validaciones JS.
+- Login con validaciones JS y cuenta demo admin@duoc.cl / 1234.
+- Nosotros, Blog y 2 detalles de blog.
+- Panel administrador con gestión básica de productos y usuarios.
+- Diseño responsive y colores/tipografías del caso.
+
+NOTA REGIONES:
+El arreglo complementario oficial de regiones/comunas no venía en los archivos subidos. Se dejaron regiones/comunas de ejemplo para demostrar la lógica dependiente.

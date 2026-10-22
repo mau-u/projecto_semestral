@@ -352,19 +352,8 @@ function mostrarCarrito() {
 }
 
 function finalizarCompra() {
-  const carrito = obtenerCarrito();
-
-  if (carrito.length === 0) {
-    alert('El carrito está vacío.');
-    return;
-  }
-
-  alert('¡Pedido confirmado correctamente!');
-
-  localStorage.removeItem('carrito');
-
-  mostrarCarrito();
-  actualizarContadorCarrito();
+  if (obtenerCarrito().length === 0) return;
+  alert('Pedido confirmado de forma demostrativa. En una siguiente etapa se conectará a un backend para generar la orden y la boleta.');
 }
 
 function mostrarError(id, mensaje) {
@@ -438,24 +427,11 @@ function prepararRegiones() {
 
 function prepararRegistro() {
   const form = document.getElementById('registerForm');
-
   if (!form) return;
 
   form.addEventListener('submit', e => {
     e.preventDefault();
-
-    limpiarErrores([
-      'errorRun',
-      'errorName',
-      'errorLastName',
-      'errorEmail',
-      'errorBirthDate',
-      'errorPassword',
-      'errorRegion',
-      'errorComuna',
-      'errorAddress'
-    ]);
-
+    limpiarErrores(['errorRun','errorName','errorLastName','errorEmail','errorBirthDate','errorPassword','errorRegion','errorComuna','errorAddress']);
     mostrarError('formSuccess', '');
 
     const run = document.getElementById('run').value.trim();
@@ -469,182 +445,64 @@ function prepararRegistro() {
     const direccion = document.getElementById('address').value.trim();
     const promo = document.getElementById('promoCode').value.trim().toUpperCase();
 
-    const soloLetras = /^[A-Za-zÁÉÍÓÚáéíóúÑñÜü\s]+$/;
-
     let valido = true;
-
     if (!validarRun(run)) {
-      mostrarError(
-        'errorRun',
-        'Ingrese un RUN válido, sin puntos ni guion.'
-      );
-
+      mostrarError('errorRun', 'Ingrese un RUN válido, sin puntos ni guion.');
       valido = false;
     }
-    if (
-      !nombre ||
-      nombre.length > 50 ||
-      !soloLetras.test(nombre)
-    ) {
-      mostrarError(
-        'errorName',
-        'El nombre es obligatorio, máximo 50 caracteres y solo puede contener letras.'
-      );
-
+    if (!nombre || nombre.length > 50) {
+      mostrarError('errorName', 'Nombre requerido, máximo 50 caracteres.');
       valido = false;
     }
-
-    if (
-      !apellidos ||
-      apellidos.length > 100 ||
-      !soloLetras.test(apellidos)
-    ) {
-      mostrarError(
-        'errorLastName',
-        'Los apellidos son obligatorios, máximo 100 caracteres y solo pueden contener letras.'
-      );
-
+    if (!apellidos || apellidos.length > 100) {
+      mostrarError('errorLastName', 'Apellidos requeridos, máximo 100 caracteres.');
       valido = false;
     }
-
     if (!correoPermitido(email) || email.length > 100) {
-      mostrarError(
-        'errorEmail',
-        'Use correo @duoc.cl, @profesor.duoc.cl o @gmail.com.'
-      );
-
+      mostrarError('errorEmail', 'Use correo @duoc.cl, @profesor.duoc.cl o @gmail.com.');
       valido = false;
     }
-
-
     if (!fecha) {
-      mostrarError(
-        'errorBirthDate',
-        'Seleccione la fecha de nacimiento.'
-      );
-
+      mostrarError('errorBirthDate', 'Seleccione la fecha de nacimiento.');
       valido = false;
     }
-
-
     if (password.length < 4 || password.length > 10) {
-      mostrarError(
-        'errorPassword',
-        'La contraseña debe tener entre 4 y 10 caracteres.'
-      );
-
+      mostrarError('errorPassword', 'La contraseña debe tener entre 4 y 10 caracteres.');
       valido = false;
     }
-
-
     if (!region) {
-      mostrarError(
-        'errorRegion',
-        'Seleccione una región.'
-      );
-
+      mostrarError('errorRegion', 'Seleccione una región.');
       valido = false;
     }
-
-
     if (!comuna) {
-      mostrarError(
-        'errorComuna',
-        'Seleccione una comuna.'
-      );
-
+      mostrarError('errorComuna', 'Seleccione una comuna.');
       valido = false;
     }
-
-
     if (!direccion || direccion.length > 300) {
-      mostrarError(
-        'errorAddress',
-        'Dirección requerida, máximo 300 caracteres.'
-      );
-
+      mostrarError('errorAddress', 'Dirección requerida, máximo 300 caracteres.');
       valido = false;
     }
-
-
     if (!valido) return;
-
 
     const edad = calcularEdad(fecha);
     const beneficios = [];
+    if (edad > 50) beneficios.push('50% de descuento por ser mayor de 50 años');
+    if (promo === 'FELICES50') beneficios.push('10% de descuento de por vida');
+    if (email.toLowerCase().endsWith('@duoc.cl') && esCumpleanos(fecha)) beneficios.push('torta gratis por cumpleaños de estudiante Duoc');
 
-    if (edad > 50) {
-      beneficios.push(
-        '50% de descuento por ser mayor de 50 años'
-      );
-    }
-
-    if (promo === 'FELICES50') {
-      beneficios.push(
-        '10% de descuento de por vida'
-      );
-    }
-
-    if (
-      email.toLowerCase().endsWith('@duoc.cl') &&
-      esCumpleanos(fecha)
-    ) {
-      beneficios.push(
-        'torta gratis por cumpleaños de estudiante Duoc'
-      );
-    }
-
-
-    const usuarios = JSON.parse(
-      localStorage.getItem('usuarios') || '[]'
-    );
-
-
-    const existe = usuarios.some(
-      usuario =>
-        usuario.email.toLowerCase() === email.toLowerCase()
-    );
-
+    const usuarios = JSON.parse(localStorage.getItem('usuarios') || '[]');
+    const existe = usuarios.some(u => u.email.toLowerCase() === email.toLowerCase());
     if (existe) {
-      mostrarError(
-        'errorEmail',
-        'Este correo ya está registrado en la demostración.'
-      );
-
+      mostrarError('errorEmail', 'Este correo ya está registrado en la demostración.');
       return;
     }
 
-    usuarios.push({
-      run,
-      nombre,
-      apellidos,
-      email,
-      fecha,
-      password,
-      region,
-      comuna,
-      direccion,
-      rol: 'Cliente'
-    });
+    usuarios.push({ run, nombre, apellidos, email, fecha, password, region, comuna, direccion, rol: 'Cliente' });
+    localStorage.setItem('usuarios', JSON.stringify(usuarios));
 
-
-    localStorage.setItem(
-      'usuarios',
-      JSON.stringify(usuarios)
-    );
-
-    document.getElementById('formSuccess').textContent =
-      `¡Registro exitoso!${
-        beneficios.length
-          ? ' Beneficios: ' + beneficios.join(', ') + '.'
-          : ''
-      }`;
-
-
+    document.getElementById('formSuccess').textContent = `¡Registro exitoso!${beneficios.length ? ' Beneficios: ' + beneficios.join(', ') + '.' : ''}`;
     form.reset();
-
-    document.getElementById('comuna').innerHTML =
-      '<option value="">Seleccione comuna</option>';
+    document.getElementById('comuna').innerHTML = '<option value="">Seleccione comuna</option>';
   });
 }
 
