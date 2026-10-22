@@ -1,5 +1,6 @@
 # Pastelería Mil Sabores
 
+<<<<<<< HEAD
 Tienda académica desarrollada para la Evaluación Parcial 2 de DSY1104. El template HTML del caso se migró a una aplicación de una sola página en React y Vite.
 
 ## Ejecutar el proyecto
@@ -55,3 +56,57 @@ El informe HTML de cobertura se genera en `coverage/html/`.
 ## Persistencia y alcance
 
 Los productos, categorías, usuarios, órdenes, eventos de auditoría y carrito se guardan en `localStorage`, por lo que los cambios permanecen al recargar el mismo navegador. La cuenta y las contraseñas son solo una simulación académica local: no uses una contraseña personal. Todavía no hay API ni backend conectado y el pago es una simulación.
+=======
+Proyecto desarrollado para la asignatura **Desarrollo Fullstack II - DSY1104**.
+
+El proyecto consiste en el desarrollo del frontend de una tienda online para
+**Pastelería Mil Sabores**, donde los usuarios pueden visualizar productos,
+buscar y filtrar el catálogo, revisar el detalle de cada producto, registrarse,
+iniciar sesión y utilizar un carrito de compras.
+
+También se incluye un panel administrativo demostrativo para la gestión de
+productos y usuarios.
+
+---
+
+## Tecnologías utilizadas
+
+- HTML5
+- CSS3
+- JavaScript
+- LocalStorage
+
+---
+
+## Estructura del proyecto
+
+```text
+projecto_semestral/
+│
+├── index.html
+├── productos.html
+├── detalle.html
+├── carrito.html
+├── registro.html
+├── login.html
+├── contacto.html
+├── nosotros.html
+├── blog.html
+├── blog1.html
+├── blog2.html
+│
+├── admin.html
+├── admin-productos.html
+├── admin-usuarios.html
+│
+├── css/
+│   └── style.css
+│
+├── js/
+│   └── main.js
+│
+├── img/
+│   └── imágenes utilizadas por el sitio
+│
+└── README.md
+>>>>>>> origin/main
