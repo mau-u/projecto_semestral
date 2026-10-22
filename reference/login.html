@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar sesión - Pastelería Mil Sabores</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&amp;family=Pacifico&amp;display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+  </head>
+  <body>
+    <header class="main-header">
+      <h1>Pastelería Mil Sabores</h1>
+      <p class="tagline">Inicio de sesión</p>
+      <nav class="navbar">
+        <ul>
+          <li>
+            <a href="index.html">Inicio</a>
+          </li>
+          <li>
+            <a href="productos.html">Productos</a>
+          </li>
+          <li>
+            <a href="nosotros.html">Nosotros</a>
+          </li>
+          <li>
+            <a href="blog.html">Blogs</a>
+          </li>
+          <li>
+            <a href="contacto.html">Contacto</a>
+          </li>
+          <li>
+            <a href="registro.html">Registro</a>
+          </li>
+          <li>
+            <a href="login.html">Iniciar sesión</a>
+          </li>
+          <li>
+            <a href="carrito.html">Carrito (<span class="cart-count">0</span>)</a>
+          </li>
+        </ul>
+      </nav>
+    </header>
+    <main>
+      <section class="form-section">
+        <h2>Iniciar sesión</h2>
+        <div class="form-card">
+          <form id="loginForm" novalidate autocomplete="on">
+            <div class="form-group">
+              <label for="loginEmail">Correo</label>
+              <input id="loginEmail" type="email" maxlength="100" autocomplete="email">
+              <span class="error-msg" id="errorLoginEmail"></span>
+            </div>
+            <div class="form-group">
+              <label for="loginPassword">Contraseña</label>
+              <input id="loginPassword" type="password" minlength="4" maxlength="10" autocomplete="current-password">
+              <span class="error-msg" id="errorLoginPassword"></span>
+            </div>
+            <button type="submit">Ingresar</button>
+            <div id="loginSuccess" class="success-msg">
+            </div>
+            <p class="help-text">Cuenta demo administrador: admin@duoc.cl / 1234</p>
+          </form>
+        </div>
+      </section>
+    </main>
+    <footer class="main-footer">
+      <p>© 2026 Pastelería Mil Sabores.</p>
+    </footer>
+    <script src="js/main.js"></script>
+  </body>
+</html>
