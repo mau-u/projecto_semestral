@@ -29,4 +29,15 @@ describe('tarjeta de producto', () => {
     expect(onView).toHaveBeenCalledWith(product);
     expect(onAdd).toHaveBeenCalledWith(product);
   });
+  it('mantiene el acceso al detalle y oculta la compra en modo de solo lectura', () => {
+    const onAdd = jasmine.createSpy('onAdd');
+    const onView = jasmine.createSpy('onView');
+    act(() => root.render(<ProductCard product={product} onAdd={onAdd} onView={onView} canPurchase={false} />));
+    expect(host.querySelector('.btn-outline-brand')).not.toBeNull();
+    expect(host.querySelector('.btn-brand')).toBeNull();
+    act(() => host.querySelector('.btn-outline-brand').click());
+    expect(onView).toHaveBeenCalledWith(product);
+    expect(onAdd).not.toHaveBeenCalled();
+  });
+
 });

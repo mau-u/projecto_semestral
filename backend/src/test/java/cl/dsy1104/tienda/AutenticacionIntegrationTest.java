@@ -42,8 +42,16 @@ class AutenticacionIntegrationTest {
     @Test @WithMockUser(roles="CLIENTE") void clienteNoPuedeListarUsuarios() throws Exception {
         mvc.perform(get("/api/v1/users")).andExpect(status().isForbidden());
     }
+    @Test @WithMockUser(roles="VENDEDOR") void vendedorPuedeConsultarProductos() throws Exception {
+        mvc.perform(get("/api/v1/products")).andExpect(status().isOk());
+    }
     @Test @WithMockUser(roles="VENDEDOR") void vendedorPuedeConsultarBoletas() throws Exception {
         mvc.perform(get("/api/v1/boletas")).andExpect(status().isOk());
+    }
+    @Test @WithMockUser(roles="VENDEDOR") void vendedorNoPuedeRealizarCompras() throws Exception {
+        mvc.perform(post("/api/v1/store/checkout").contentType(MediaType.APPLICATION_JSON)
+        .content("{}"))
+        .andExpect(status().isForbidden());
     }
     @Test @WithMockUser(roles="VENDEDOR") void vendedorNoPuedeAnularBoletas() throws Exception {
         mvc.perform(delete("/api/v1/boletas/1")).andExpect(status().isForbidden());

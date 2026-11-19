@@ -8,6 +8,7 @@ export default function CatalogView({
   categories,
   onAdd,
   onView,
+  canPurchase = true,
   title = 'Nuestros productos',
   initialCategory = 'Todas',
   offersOnly = false,
@@ -172,6 +173,7 @@ export default function CatalogView({
                 product={product}
                 onAdd={onAdd}
                 onView={onView}
+                canPurchase={canPurchase}
               />
             </div>
           ))}

@@ -6,7 +6,7 @@ services:
       MYSQL_USER: tienda
       MYSQL_PASSWORD: tienda_dev_2026
       MYSQL_ROOT_PASSWORD: root_dev_2026
-    ports: ["3306:3306"]
+    ports: ["3307:3306"]
     volumes: [mysql_data:/var/lib/mysql]
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-proot_dev_2026"]
@@ -30,7 +30,7 @@ services:
       COOKIE_SECURE: "false"
     depends_on:
       mysql: { condition: service_healthy }
-    ports: ["8080:8080"]
+    ports: ["8081:8080"]
   frontend:
     build: .
     depends_on: [backend]

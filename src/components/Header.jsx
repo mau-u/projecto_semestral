@@ -8,6 +8,10 @@ const links = [
 export default function Header({ cartCount = 0, currentUser, onLogout }) {
   const [expanded, setExpanded] = useState(false);
   const closeMenu = () => setExpanded(false);
+  // El vendedor solo necesita navegar por Inicio, Productos y su panel.
+  const visibleLinks = currentUser?.role === 'vendedor'
+    ? [['Inicio', '#/'], ['Productos', '#/productos']]
+    : links;
 
   return (
     <>
@@ -23,7 +27,7 @@ export default function Header({ cartCount = 0, currentUser, onLogout }) {
           </button>
           <div id="main-navigation" className={`collapse navbar-collapse ${expanded ? 'show' : ''}`}>
             <div className="navbar-nav ms-auto align-items-lg-center gap-lg-1">
-              {links.map(([label, href]) => <a key={href} className="nav-link" href={href} onClick={closeMenu}>{label}</a>)}
+              {visibleLinks.map(([label, href]) => <a key={href} className="nav-link" href={href} onClick={closeMenu}>{label}</a>)}
               {currentUser?.role === 'admin'
                 ? <><a className="nav-link admin-nav-link" href="#/admin">Panel admin</a><button className="btn btn-link nav-link" onClick={() => { onLogout?.(); closeMenu(); }}>Salir</button></>
                 : currentUser?.role === 'vendedor'
@@ -31,9 +35,11 @@ export default function Header({ cartCount = 0, currentUser, onLogout }) {
                 : currentUser
                   ? <><a className="nav-link" href="#/mis-compras">Mis compras</a><span className="nav-link customer-greeting">Hola, {currentUser.nombre || currentUser.name}</span><button className="btn btn-link nav-link" onClick={() => { onLogout?.(); closeMenu(); }}>Salir</button></>
                   : <a className="nav-link" href="#/login" onClick={closeMenu}>Iniciar sesión</a>}
-              <a className="btn btn-brand cart-nav ms-lg-2" href="#/carrito" onClick={closeMenu} aria-label={`Carrito, ${cartCount} productos`}>
-                <span aria-hidden="true">♧</span> Carrito <span className="cart-badge">{cartCount}</span>
-              </a>
+              {currentUser?.role !== 'vendedor' && (
+                <a className="btn btn-brand cart-nav ms-lg-2" href="#/carrito" onClick={closeMenu} aria-label={`Carrito, ${cartCount} productos`}>
+                  <span aria-hidden="true">♧</span> Carrito <span className="cart-badge">{cartCount}</span>
+                </a>
+              )}
             </div>
           </div>
         </nav>

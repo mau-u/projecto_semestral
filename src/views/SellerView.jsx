@@ -1,20 +1,23 @@
 import React, { useState } from 'react';
 import { formatDate, formatPrice } from '../utils/format.js';
 
-export default function SellerView({ products, orders }) {
+export default function SellerView({ products, orders, onView }) {
   const [selected, setSelected] = useState(null);
   const order = orders.find((item) => item.id === selected);
 
   return <main className="admin-page">
     <aside className="admin-sidebar">
       <div className="admin-sidebar-brand"><span className="brand-mark">✿</span><span><strong>Mil Sabores</strong><small>Vista de vendedor</small></span></div>
-      <nav aria-label="Menú de vendedor"><a className="active" href="#/vendedor">Productos y órdenes</a></nav>
+      <nav aria-label="Menú de vendedor">
+        <a className="active" href="#/vendedor">Productos y órdenes</a>
+        <a href="#/productos">Explorar catálogo</a>
+      </nav>
       <a className="admin-back-link" href="#/">← Volver a la tienda</a>
     </aside>
     <section className="admin-main">
-      <div className="admin-page-heading"><div><p className="eyebrow">Operación de tienda</p><h1>Panel de vendedor</h1><p>Consulta productos, existencias y órdenes de compra.</p></div></div>
+      <div className="admin-page-heading"><div><p className="eyebrow">Operación de tienda</p><h1>Panel de vendedor</h1><p>Consulta productos, existencias y órdenes de compra. Esta cuenta tiene permisos de solo lectura.</p></div><a className="btn btn-outline-brand" href="#/productos">Ver catálogo completo</a></div>
       <section className="admin-panel"><div className="admin-panel-heading"><div><h2>Productos <span className="count-chip">{products.length}</span></h2></div></div>
-        <div className="admin-table-wrap"><table className="admin-table"><thead><tr><th>Producto</th><th>Categoría</th><th>Precio</th><th>Stock</th></tr></thead><tbody>{products.map((item) => <tr key={item.codigo}><td>{item.nombre}</td><td>{item.categoria}</td><td>{formatPrice(item.precio)}</td><td>{item.stock}</td></tr>)}</tbody></table></div>
+        <div className="admin-table-wrap"><table className="admin-table"><thead><tr><th>Producto</th><th>Categoría</th><th>Precio</th><th>Stock</th><th>Detalle</th></tr></thead><tbody>{products.map((item) => <tr key={item.codigo}><td>{item.nombre}</td><td>{item.categoria}</td><td>{formatPrice(item.precio)}</td><td>{item.stock}</td><td><button className="table-action" type="button" onClick={() => onView?.(item)}>Ver detalle</button></td></tr>)}</tbody></table></div>
       </section>
       <section className="admin-panel"><div className="admin-panel-heading"><div><h2>Órdenes <span className="count-chip">{orders.length}</span></h2></div></div>
         {orders.length ? <div className="admin-table-wrap"><table className="admin-table"><thead><tr><th>Boleta</th><th>Fecha</th><th>Cliente</th><th>Total</th><th>Detalle</th></tr></thead><tbody>{orders.map((item) => <tr key={item.id}><td>{item.id}</td><td>{formatDate(item.createdAt)}</td><td>{item.customer.name}</td><td>{formatPrice(item.total)}</td><td><button className="table-action" onClick={() => setSelected(item.id)}>Ver detalle</button></td></tr>)}</tbody></table></div> : <p className="admin-empty">Todavía no hay órdenes registradas.</p>}

@@ -37,4 +37,18 @@ describe('navegación de la tienda', () => {
     act(() => [...host.querySelectorAll('button')].find((button) => button.textContent.trim() === 'Salir').click());
     expect(onLogout).toHaveBeenCalled();
   });
+  it('muestra al vendedor solo Inicio, Productos y Panel vendedor, sin carrito', () => {
+    act(() => root.render(<Header cartCount={3} currentUser={{ nombre: 'Vendedor', role: 'vendedor' }} />));
+    expect(host.querySelector('.cart-nav')).toBeNull();
+    expect(host.querySelector('.navbar-nav a[href="#/"]')?.textContent).toBe('Inicio');
+    expect(host.querySelector('a[href="#/productos"]')?.textContent).toBe('Productos');
+    expect(host.querySelector('a[href="#/vendedor"]')?.textContent).toBe('Panel vendedor');
+    expect(host.textContent).not.toContain('Categorías');
+    expect(host.textContent).not.toContain('Ofertas');
+    expect(host.textContent).not.toContain('Nosotros');
+    expect(host.textContent).not.toContain('Blog');
+    expect(host.textContent).not.toContain('Contacto');
+    expect(host.textContent).toContain('Salir');
+  });
+
 });

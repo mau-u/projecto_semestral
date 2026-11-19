@@ -35,7 +35,11 @@ function readSession() {
 }
 
 function AdminAccess() {
-  return <main className="container content-section"><div className="empty-state"><span>⌑</span><p className="eyebrow">Área administrativa</p><h1>Inicia sesión para continuar</h1><p>Usa la cuenta demo para acceder al panel y administrar el catálogo.</p><a className="btn btn-brand" href="#/login">Ir a iniciar sesión</a></div></main>;
+  return <main className="container content-section"><div className="empty-state"><span>⌑</span><p className="eyebrow">Área administrativa</p><h1>Inicia sesión para continuar</h1><p>Usa una cuenta autorizada para acceder a esta sección.</p><a className="btn btn-brand" href="#/login">Ir a iniciar sesión</a></div></main>;
+}
+
+function SellerPurchaseBlocked() {
+  return <main className="container content-section"><div className="empty-state"><span>◉</span><p className="eyebrow">Acceso de vendedor</p><h1>Compras no disponibles</h1><p>La cuenta de vendedor puede consultar productos, precios, stock y órdenes, pero no agregar productos al carrito ni confirmar compras.</p><a className="btn btn-brand" href="#/vendedor">Volver al panel de vendedor</a></div></main>;
 }
 
 export default function App() {
@@ -128,6 +132,10 @@ export default function App() {
   const refreshCategories = async () => setCategories((await api.adminCategories()).map(mapApiCategory));
   const updateCart = (next) => { cartRepository.replace(next); setCart(next); };
   const addToCart = (product, quantity = 1, message = '') => {
+    if (currentUser?.role === 'vendedor') {
+      setNotice('La cuenta de vendedor solo puede visualizar productos.');
+      return;
+    }
     const requested = Number(quantity);
     const alreadyInCart = cart.filter((item) => item.codigo === product.codigo).reduce((sum, item) => sum + Number(item.cantidad), 0);
     const available = Math.max(0, Number(products.find((item) => item.codigo === product.codigo)?.stock) || 0);
@@ -148,6 +156,7 @@ export default function App() {
   };
   const removeFromCart = (line) => updateCart(cart.filter((item) => !(item.codigo === line.codigo && (item.mensaje || '') === (line.mensaje || ''))));
   const pay = async (customer, outcome) => {
+    if (currentUser?.role === 'vendedor') return 'La cuenta de vendedor no tiene permiso para realizar compras.';
     if (!isValidName(customer.name)) return 'El nombre debe contener solo letras y espacios.';
     if (!isSyntacticallyValidEmail(customer.email)) return 'Ingresa un correo electrónico con formato válido.';
     if (!isValidChileanMobile(customer.phone)) return 'Ingresa un celular chileno con formato +569 y 8 dígitos.';
@@ -264,6 +273,11 @@ export default function App() {
   const openProduct = (product) => { window.location.hash = `#/producto/${encodeURIComponent(product.codigo)}`; };
   const path = route.split('?')[0];
   const adminRoute = path.startsWith('/admin');
+  const sellerReadOnly = currentUser?.role === 'vendedor';
+  const sellerRestrictedPath = sellerReadOnly && (
+    path === '/categorias' || path.startsWith('/categoria/') || path === '/ofertas' ||
+    path === '/nosotros' || path === '/blog' || path.startsWith('/blog/') || path === '/contacto'
+  );
   const adminSection = path.split('/')[2] || 'inicio';
   const productCode = decodeURIComponent(path.split('/')[2] || '');
   const selectedProduct = products.find((product) => product.codigo === productCode);
@@ -271,20 +285,21 @@ export default function App() {
   const selectedCategory = categories.find((category) => category.id === categorySlug || slugify(category.nombre) === categorySlug);
 
   let view;
-  if (path === '/') view = <HomeView products={products} categories={categories} onAdd={addToCart} onView={openProduct} onCategory={(name) => { window.location.hash = `#/categoria/${slugify(name)}`; }} />;
-  else if (path === '/productos') view = <CatalogView products={products} categories={categories} onAdd={addToCart} onView={openProduct} />;
-  else if (path === '/categorias') view = <CatalogView products={products} categories={categories} onAdd={addToCart} onView={openProduct} title="Explora por categoría" categoryOnly onCategory={(name) => { window.location.hash = `#/categoria/${slugify(name)}`; }} />;
+  if (sellerRestrictedPath) view = <HomeView products={products} categories={categories} onAdd={addToCart} onView={openProduct} canPurchase={false} sellerMode />;
+  else if (path === '/') view = <HomeView products={products} categories={categories} onAdd={addToCart} onView={openProduct} canPurchase={!sellerReadOnly} sellerMode={sellerReadOnly} onCategory={(name) => { window.location.hash = `#/categoria/${slugify(name)}`; }} />;
+  else if (path === '/productos') view = <CatalogView products={products} categories={categories} onAdd={addToCart} onView={openProduct} canPurchase={!sellerReadOnly} />;
+  else if (path === '/categorias') view = <CatalogView products={products} categories={categories} onAdd={addToCart} onView={openProduct} canPurchase={!sellerReadOnly} title="Explora por categoría" categoryOnly onCategory={(name) => { window.location.hash = `#/categoria/${slugify(name)}`; }} />;
   else if (path.startsWith('/categoria/')) view = selectedCategory
-    ? <CatalogView products={products} categories={categories} onAdd={addToCart} onView={openProduct} title={selectedCategory.nombre} initialCategory={selectedCategory.nombre} />
-    : <CatalogView products={products} categories={categories} onAdd={addToCart} onView={openProduct} title="Nuestros productos" />;
-  else if (path === '/ofertas') view = <CatalogView products={products} categories={categories} onAdd={addToCart} onView={openProduct} title="Ofertas de la semana" offersOnly />;
-  else if (path.startsWith('/producto/')) view = <ProductDetailView product={selectedProduct} onAdd={addToCart} />;
-  else if (path === '/carrito') view = <CartView cart={cart} onQuantity={changeQuantity} onRemove={removeFromCart} />;
+    ? <CatalogView products={products} categories={categories} onAdd={addToCart} onView={openProduct} canPurchase={!sellerReadOnly} title={selectedCategory.nombre} initialCategory={selectedCategory.nombre} />
+    : <CatalogView products={products} categories={categories} onAdd={addToCart} onView={openProduct} canPurchase={!sellerReadOnly} title="Nuestros productos" />;
+  else if (path === '/ofertas') view = <CatalogView products={products} categories={categories} onAdd={addToCart} onView={openProduct} canPurchase={!sellerReadOnly} title="Ofertas de la semana" offersOnly />;
+  else if (path.startsWith('/producto/')) view = <ProductDetailView product={selectedProduct} onAdd={addToCart} canPurchase={!sellerReadOnly} />;
+  else if (path === '/carrito') view = sellerReadOnly ? <SellerPurchaseBlocked /> : <CartView cart={cart} onQuantity={changeQuantity} onRemove={removeFromCart} />;
   else if (path === '/mis-compras') view = currentUser?.role === 'cliente' ? <MyOrdersView orders={myOrders} /> : <AdminAccess />;
-  else if (path === '/checkout') view = <CheckoutView cart={cart} onPay={pay} currentUser={currentUser} />;
-  else if (path === '/vendedor') view = currentUser?.role === 'vendedor' ? <SellerView products={products} orders={orders} /> : <AdminAccess />;
-  else if (path === '/pago/exito') view = <PaymentResultView order={recentOrder?.status === 'paid' ? recentOrder : null} successful />;
-  else if (path === '/pago/fallido') view = <PaymentResultView order={recentOrder?.status === 'rejected' ? recentOrder : null} successful={false} />;
+  else if (path === '/checkout') view = sellerReadOnly ? <SellerPurchaseBlocked /> : <CheckoutView cart={cart} onPay={pay} currentUser={currentUser} />;
+  else if (path === '/vendedor') view = currentUser?.role === 'vendedor' ? <SellerView products={products} orders={orders} onView={openProduct} /> : <AdminAccess />;
+  else if (path === '/pago/exito') view = sellerReadOnly ? <SellerPurchaseBlocked /> : <PaymentResultView order={recentOrder?.status === 'paid' ? recentOrder : null} successful />;
+  else if (path === '/pago/fallido') view = sellerReadOnly ? <SellerPurchaseBlocked /> : <PaymentResultView order={recentOrder?.status === 'rejected' ? recentOrder : null} successful={false} />;
   else if (path === '/login') view = <LoginView onLogin={login} />;
   else if (path === '/registro') view = <RegisterView onRegister={register} />;
   else if (path === '/nosotros') view = <AboutView />;
@@ -307,8 +322,8 @@ export default function App() {
       else content = <AdminProfile user={currentUser} />;
       view = <AdminLayout section={section}>{content}</AdminLayout>;
     }
-  } else view = <HomeView products={products} categories={categories} onAdd={addToCart} onView={openProduct} onCategory={(name) => { window.location.hash = `#/categoria/${slugify(name)}`; }} />;
+  } else view = <HomeView products={products} categories={categories} onAdd={addToCart} onView={openProduct} canPurchase={!sellerReadOnly} sellerMode={sellerReadOnly} onCategory={(name) => { window.location.hash = `#/categoria/${slugify(name)}`; }} />;
 
   const dashboardRoute = adminRoute || path === '/vendedor';
-  return <><Header cartCount={cartQuantity(cart)} currentUser={currentUser} onLogout={logout} />{view}{!dashboardRoute && <Footer />}{notice && <div className="toast-note" role="status"><span>✓</span>{notice}</div>}</>;
+  return <><Header cartCount={cartQuantity(cart)} currentUser={currentUser} onLogout={logout} />{view}{!dashboardRoute && !sellerReadOnly && <Footer />}{notice && <div className="toast-note" role="status"><span>✓</span>{notice}</div>}</>;
 }

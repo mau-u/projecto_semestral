@@ -2,7 +2,7 @@ import React from 'react';
 import { formatPrice } from '../utils/format.js';
 import { getProductPrice } from '../data/persistence.js';
 
-export default function ProductCard({ product, onAdd, onView }) {
+export default function ProductCard({ product, onAdd, onView, canPurchase = true }) {
   const price = getProductPrice(product);
   return (
     <article className="product-card h-100">
@@ -19,7 +19,7 @@ export default function ProductCard({ product, onAdd, onView }) {
         <div className="product-price-row"><strong>{formatPrice(price)}</strong>{product.isOffer && <del>{formatPrice(product.precio)}</del>}</div>
         <div className="product-card-actions">
           <button className="btn btn-outline-brand" type="button" onClick={() => onView?.(product)}>Ver detalle</button>
-          <button className="btn btn-brand" type="button" disabled={Number(product.stock) <= 0} onClick={() => onAdd?.(product)}>{Number(product.stock) > 0 ? 'Agregar' : 'Agotado'}</button>
+          {canPurchase && <button className="btn btn-brand" type="button" disabled={Number(product.stock) <= 0} onClick={() => onAdd?.(product)}>{Number(product.stock) > 0 ? 'Agregar' : 'Agotado'}</button>}
         </div>
       </div>
     </article>

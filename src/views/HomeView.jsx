@@ -12,7 +12,9 @@ export default function HomeView({
   categories,
   onAdd,
   onView,
-  onCategory
+  canPurchase = true,
+  onCategory,
+  sellerMode = false
 }) {
   const featured = products
     .filter((product) => product.isOffer)
@@ -50,12 +52,14 @@ export default function HomeView({
                 <span aria-hidden="true">↗</span>
               </a>
 
-              <a
-                className="btn btn-light btn-lg"
-                href="#/nosotros"
-              >
-                Nuestra historia
-              </a>
+              {!sellerMode && (
+                <a
+                  className="btn btn-light btn-lg"
+                  href="#/nosotros"
+                >
+                  Nuestra historia
+                </a>
+              )}
             </div>
 
             <div className="hero-note">
@@ -175,8 +179,8 @@ export default function HomeView({
       </section>
 
 
-      {/* Categorías de productos */}
-      <section className="container content-section">
+      {/* Las categorías son una vista secundaria que no se ofrece al vendedor. */}
+      {!sellerMode && <section className="container content-section">
         <SectionHeading
           eyebrow="Encuentra tu favorito"
           title="Algo rico para cada ocasión"
@@ -205,11 +209,11 @@ export default function HomeView({
             </button>
           ))}
         </div>
-      </section>
+      </section>}
 
 
-      {/* Productos destacados en oferta */}
-      <section className="featured-section">
+      {/* La sección de ofertas se reserva para clientes y visitantes. */}
+      {!sellerMode && <section className="featured-section">
         <div className="container content-section">
           <SectionHeading
             eyebrow="Un gusto de temporada"
@@ -236,16 +240,17 @@ export default function HomeView({
                   product={product}
                   onAdd={onAdd}
                   onView={onView}
+                  canPurchase={canPurchase}
                 />
               </div>
             ))}
           </div>
         </div>
-      </section>
+      </section>}
 
 
-      {/* Historia de la pastelería */}
-      <section className="story-banner container">
+      {/* La historia tiene su propia vista, no visible para el vendedor. */}
+      {!sellerMode && <section className="story-banner container">
 
         <div className="story-copy">
           <p className="eyebrow">
@@ -288,7 +293,7 @@ export default function HomeView({
           </span>
         </div>
 
-      </section>
+      </section>}
 
     </main>
   );

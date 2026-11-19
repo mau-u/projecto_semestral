@@ -11,7 +11,8 @@ import { getProductPrice } from '../data/persistence.js';
 
 export default function ProductDetailView({
   product,
-  onAdd
+  onAdd,
+  canPurchase = true
 }) {
   const [quantity, setQuantity] = useState(1);
   const [message, setMessage] = useState('');
@@ -111,63 +112,51 @@ export default function ProductDetailView({
           </p>
 
 
-          {/* Mensaje personalizado para tortas */}
-          {isCake && (
-            <label className="form-label detail-label">
-              Mensaje especial para la torta
+          {canPurchase ? (
+            <>
+              {/* Mensaje personalizado para tortas */}
+              {isCake && (
+                <label className="form-label detail-label">
+                  Mensaje especial para la torta
+                  <input
+                    className="form-control"
+                    maxLength="80"
+                    value={message}
+                    onChange={(event) => setMessage(event.target.value)}
+                    placeholder="Ej.: Feliz cumpleaños, Ana"
+                  />
+                </label>
+              )}
 
-              <input
-                className="form-control"
-                maxLength="80"
-                value={message}
-                onChange={(event) =>
-                  setMessage(event.target.value)
-                }
-                placeholder="Ej.: Feliz cumpleaños, Ana"
-              />
-            </label>
+              {/* Selector de cantidad */}
+              <label className="form-label detail-label">
+                Cantidad
+                <input
+                  className="form-control quantity-input"
+                  type="number"
+                  min="1"
+                  max={maxQuantity}
+                  value={quantity}
+                  onChange={(event) => setQuantity(Math.max(1, Math.min(maxQuantity, Number(event.target.value) || 1)))}
+                />
+              </label>
+
+              {/* Botón para agregar al carrito */}
+              <button
+                className="btn btn-brand btn-lg w-100"
+                disabled={available === 0}
+                onClick={() => onAdd?.(product, quantity, message.trim())}
+              >
+                {available > 0
+                  ? `Agregar al carrito · ${formatPrice(getProductPrice(product) * quantity)}`
+                  : 'Producto agotado'}
+              </button>
+            </>
+          ) : (
+            <div className="alert alert-light border" role="status">
+              Vista de vendedor: puedes consultar la información, el precio y el stock del producto, pero no realizar compras.
+            </div>
           )}
-
-
-          {/* Selector de cantidad */}
-          <label className="form-label detail-label">
-            Cantidad
-
-            <input
-              className="form-control quantity-input"
-              type="number"
-              min="1"
-              max={maxQuantity}
-              value={quantity}
-              onChange={(event) =>
-                setQuantity(
-                  Math.max(
-                    1,
-                    Math.min(
-                      maxQuantity,
-                      Number(event.target.value) || 1
-                    )
-                  )
-                )
-              }
-            />
-          </label>
-
-
-          {/* Botón para agregar al carrito */}
-          <button
-            className="btn btn-brand btn-lg w-100"
-            disabled={available === 0}
-            onClick={() =>
-              onAdd(product, quantity, message.trim())
-            }
-          >
-            {available > 0
-              ? `Agregar al carrito · ${formatPrice(
-                  getProductPrice(product) * quantity
-                )}`
-              : 'Producto agotado'}
-          </button>
 
 
           <p className="detail-footnote">
