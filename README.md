@@ -1,80 +1,115 @@
 # Pastelería Mil Sabores
 
-Aplicación full stack de tienda en línea. El frontend está construido con React y Vite; el backend usa Java y Spring Boot; MySQL guarda los usuarios, el catálogo y las compras. Docker Compose inicia los tres servicios juntos.
+Tienda en línea para explorar productos de pastelería, comprar y consultar pedidos. Incluye una interfaz React, una API en Java y una base de datos MySQL. Docker Compose conecta los servicios para ejecutar la aplicación localmente.
 
-## Inicio rápido
+Para iniciar sesión y seguir los pasos de prueba, consulta la [guía rápida de uso](README_DSY1104.md). Para revisar consultas SQL y pruebas de Swagger con más detalle, consulta la [nota de pruebas](docs/NOTA_PRUEBAS_LOCAL.md).
 
-1. Abre Docker Desktop y espera a que esté iniciado.
-2. Abre esta carpeta en VS Code y usa **Terminal → New Terminal**.
-3. Inicia los servicios:
+## Tecnologías
 
-   ```powershell
-   docker compose up -d
-   ```
+- **Frontend:** React 19, JavaScript, Vite 7 y Bootstrap 5.
+- **Backend:** Java 21, Spring Boot 3, Spring Security y API REST.
+- **Autenticación:** JWT en cookie `HttpOnly` y autorización basada en roles.
+- **Base de datos:** MySQL 8.4 con persistencia relacional.
+- **Ejecución local:** Docker Compose y Nginx.
+- **Documentación del API:** Swagger UI y OpenAPI.
 
-   Si hiciste cambios en el código y quieres reconstruir las imágenes:
+## Cómo está construido
 
-   ```powershell
-   docker compose up -d --build
-   ```
+El frontend presenta las vistas y recoge las acciones del usuario. `src/App.jsx` mantiene el estado general de la tienda, interpreta las rutas y coordina el acceso a los servicios. `src/services/api.js` hace las llamadas al backend. Nginx sirve los archivos de React y redirige las solicitudes `/api` al backend.
 
-4. Abre la tienda en <http://localhost>.
+Spring Boot recibe esas solicitudes en los controladores, valida los datos, aplica las reglas de negocio y comprueba el rol del usuario. Los servicios ejecutan las operaciones y los repositorios consultan las entidades de MySQL.
 
-Swagger está en <http://localhost:8080/swagger-ui/index.html>. La guía paso a paso para probar la tienda, Swagger y MySQL está en [docs/NOTA_PRUEBAS_LOCAL.md](docs/NOTA_PRUEBAS_LOCAL.md).
+En un checkout aprobado, el backend obtiene los precios actuales desde la base de datos, valida stock, crea una boleta y sus detalles y descuenta las unidades en una transacción. Cuando el cliente abre **Mis compras**, el backend devuelve las boletas asociadas a su cuenta.
 
-## Cómo funciona el programa
+## Navegación de la tienda
 
-1. **Frontend:** el contenedor `frontend` sirve la tienda React. Ahí el cliente navega por el catálogo, administra el carrito, inicia sesión y completa el checkout.
-2. **Comunicación con el backend:** las llamadas de la tienda usan el API REST versionada bajo `/api/v1`. Nginx envía las llamadas `/api` al contenedor `backend`.
-3. **Backend:** Spring Boot valida los datos recibidos, aplica las reglas del negocio y comprueba la sesión y los permisos del rol.
-4. **Base de datos:** el backend lee y guarda los datos en MySQL. En una compra aprobada, vuelve a validar precios y stock, guarda la boleta y sus detalles y descuenta el inventario dentro de una transacción.
-5. **Mis compras:** el backend busca las boletas asociadas al cliente que inició sesión; por eso cada cliente ve sus propios pedidos.
+El recorrido normal del cliente es:
 
-El inicio de sesión entrega un JWT en una cookie protegida `HttpOnly`. En Swagger, inicia sesión desde **POST `/api/v1/auth/login`** y ejecuta las demás operaciones en la misma pestaña; no necesitas copiar el token. El flujo de pago es una demostración académica y no se conecta a un proveedor de pagos real.
+**Inicio → Productos o Categorías → Detalle del producto → Carrito → Checkout → Resultado de pago → Mis compras.**
+
+La navegación también incluye ofertas, Nosotros, Blog y Contacto. Las vistas principales se abren con rutas hash, por ejemplo `#/productos`, `#/carrito` y `#/mis-compras`.
+
+| Ruta | Vista |
+| --- | --- |
+| `#/` | Portada de la tienda. |
+| `#/productos`, `#/categorias`, `#/categoria/:slug`, `#/ofertas` | Catálogo, categorías y ofertas. |
+| `#/producto/:id` | Detalle de un producto. |
+| `#/carrito`, `#/checkout` | Carrito y confirmación del pedido. |
+| `#/pago/exito`, `#/pago/fallido` | Resultado del pago simulado. |
+| `#/login`, `#/registro`, `#/mis-compras` | Cuenta del cliente y su historial. |
+| `#/vendedor` | Panel de consulta del vendedor. |
+| `#/admin/inicio`, `#/admin/productos`, `#/admin/categorias`, `#/admin/ordenes`, `#/admin/usuarios` | Secciones del panel de administración. También incluye stock crítico, auditoría, reportes y perfil. |
+
+| Área | Qué permite hacer |
+| --- | --- |
+| Tienda | Explorar y filtrar el catálogo, ver productos y categorías, usar el carrito y completar el checkout. |
+| Cliente | Registrarse, iniciar sesión y consultar sus propias compras. |
+| Vendedor | Consultar productos y boletas desde su panel. |
+| Administrador | Administrar productos, categorías y usuarios, revisar órdenes y consultar informes. |
 
 ## Roles y permisos
 
-| Rol | Acceso principal |
-| --- | --- |
-| Administrador | CRUD de productos, categorías y usuarios; consulta y anulación de boletas. |
-| Vendedor | Solo lectura de productos (`GET /api/v1/products`) y boletas (`GET /api/v1/boletas`). No puede consultar usuarios. |
-| Cliente | Navegación de la tienda, checkout y consulta de sus compras (`GET /api/v1/store/orders`). |
+- **Administrador:** acceso de gestión a productos, categorías y usuarios; puede consultar y anular boletas.
+- **Vendedor:** solo consulta productos y boletas. No tiene permiso para ver usuarios; por eso `GET /api/v1/users` responde `403 Forbidden` con este rol.
+- **Cliente:** compra en la tienda y consulta sus propios pedidos mediante `GET /api/v1/store/orders`.
 
-El endpoint **GET `/api/v1/users`** está restringido al administrador. Si el vendedor intenta ejecutarlo en Swagger, recibe **403 Forbidden**: es el permiso esperado, no un fallo de Swagger. Para probar ese endpoint, inicia sesión como administrador en Swagger.
+Los productos y categorías públicos se consultan bajo `/api/v1/store`. El inicio de sesión en `POST /api/v1/auth/login` guarda el JWT en una cookie protegida. En Swagger, las operaciones autenticadas deben probarse en la misma pestaña después del login.
 
-## Cuentas locales
+## Estructura del proyecto
 
-- Administrador: `admin.ep3@duoc.cl` / `Admin123!`
-- Vendedor: `vendedor.ep3@duoc.cl` / `Vendedor123!`
-- Cliente: regístrate en <http://localhost/#/registro> y usa el correo y la contraseña que elegiste.
-
-## Base de datos y contenedores
-
-Docker Compose crea la base `tienda_online` y conserva los datos en el volumen `mysql_data`. No necesitas instalar XAMPP. Para consultar las tablas desde la terminal:
-
-```powershell
-docker compose exec mysql mysql -utienda -p tienda_online
+```text
+projecto_semestral/
+├── backend/
+│   └── src/
+│       ├── main/java/cl/dsy1104/tienda/
+│       │   ├── config/       # Seguridad, OpenAPI y datos iniciales
+│       │   ├── controller/   # Endpoints REST /api/v1
+│       │   ├── dto/          # Formatos de entrada y salida del API
+│       │   ├── entity/       # Usuario, producto, categoría y boleta
+│       │   ├── repository/   # Consultas a MySQL con Spring Data
+│       │   ├── security/     # JWT, cookie y contexto del usuario
+│       │   └── service/      # Reglas de negocio y operaciones
+│       ├── main/resources/   # Configuración de Spring
+│       └── test/             # Pruebas del backend
+├── docs/                     # Manual, requisitos, modelo y guías de prueba
+├── public/                   # Imágenes y recursos estáticos
+├── reference/                # Plantillas HTML originales de referencia
+├── src/
+│   ├── components/           # Componentes reutilizables e interfaz admin
+│   ├── data/                 # Datos base, carrito y persistencia local
+│   ├── services/api.js       # Cliente HTTP para el backend
+│   ├── utils/                # Validación, formato y promociones
+│   ├── views/                # Pantallas de tienda y paneles
+│   ├── App.jsx               # Navegación y coordinación de vistas
+│   └── styles.css            # Estilos de la aplicación
+├── docker-compose.yml        # MySQL, backend y frontend
+├── Dockerfile                # Construcción del frontend
+└── nginx.conf                # Sitio estático y proxy hacia el API
 ```
 
-La contraseña local de MySQL es `tienda_dev_2026`. La nota de pruebas incluye consultas para ver boletas y detalles.
+## API y modelo de datos
 
-Para detener los servicios sin borrar los datos:
+El API está versionado bajo `/api/v1`. Sus grupos principales son:
 
-```powershell
-docker compose stop
-```
+- `/auth`: registro, login, perfil y cierre de sesión.
+- `/store`: catálogo público, checkout y compras del cliente autenticado.
+- `/products`, `/categories`, `/users`: operaciones de administración según el rol.
+- `/boletas`: consulta de boletas y anulación administrativa.
 
-Evita `docker compose down -v` si quieres conservar la base de datos.
+Las tablas principales son `usuario`, `producto`, `categoria`, `boleta` y `detalle_boleta`. Una boleta pertenece a un usuario y contiene sus líneas de detalle. Docker Compose mantiene la base en el volumen `mysql_data` para conservar los datos cuando se detienen los contenedores.
 
-## Documentación del proyecto
+## Alcance de la demostración
 
-- [Guía para probar tienda, Swagger y MySQL](docs/NOTA_PRUEBAS_LOCAL.md)
+El pago es simulado para fines académicos: no se conecta a un proveedor de pagos real. El carrito se mantiene en el navegador; las cuentas, catálogo, inventario, boletas y detalles confirmados se guardan en MySQL.
+
+Las pruebas existentes están en `src/**/*.spec.*` y `backend/src/test`. En esta entrega se verificó la compilación del frontend y de las imágenes Docker; las pruebas automatizadas no se ejecutaron.
+
+## Documentación relacionada
+
+- [Guía rápida: entrar y probar la aplicación](README_DSY1104.md)
+- [Nota detallada: tienda, Swagger y MySQL](docs/NOTA_PRUEBAS_LOCAL.md)
 - [Manual de usuario](docs/Manual_Usuario_TiendaOnline.docx)
-- [Documento de evaluación DSY1104](README_DSY1104.md)
-- [Flujo de integración](INTEGRACION_MIL_SABORES.md)
 - [Requisitos del sistema](docs/ERS_TiendaOnline.docx)
 - [Documentación de APIs e integración](docs/Documentacion_APIs_Integracion_TiendaOnline.docx)
 - [Matriz de pruebas y rúbrica](docs/Matriz_de_Pruebas_y_Rubrica.md)
 - Diagramas: `docs/modelo_relacional.png` y `docs/arquitectura_integracion.png`.
-
-Para un despliegue compartido, cambia las contraseñas y el secreto JWT de ejemplo configurados en `docker-compose.yml`.

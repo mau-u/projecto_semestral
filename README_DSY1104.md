@@ -1,60 +1,94 @@
-# Mil Sabores — Evaluación Parcial 3 DSY1104
+# Guía rápida para entrar y probar Mil Sabores
 
-Proyecto full stack basado en la tienda React original, integrado con API REST Spring Boot, Spring Security/JWT y MySQL.
+Usa esta guía para iniciar la tienda, entrar con una cuenta de prueba y revisar el API o la base de datos. Para conocer cómo se organiza el código y cómo funciona cada parte, revisa el [README principal](README.md).
 
-## Inicio rápido en Windows
+## 1. Iniciar el proyecto
 
-1. Instala Docker Desktop y espera a que indique que está iniciado.
-2. Abre PowerShell en la carpeta del proyecto.
-3. Ejecuta:
+1. Abre Docker Desktop y espera a que esté iniciado.
+2. Abre esta carpeta del proyecto en VS Code y crea una terminal nueva.
+3. Inicia MySQL, el backend y el frontend:
 
-```powershell
-docker compose up --build
-```
+   ```powershell
+   docker compose up -d
+   ```
 
-4. Abre `http://localhost`.
+   Si modificaste código, reconstruye las imágenes al iniciar:
 
-El primer inicio descarga las imágenes de MySQL, Java y Nginx. Swagger está en `http://localhost:8080/swagger-ui.html`.
+   ```powershell
+   docker compose up -d --build
+   ```
 
-## Cuentas locales
+4. En Docker Desktop, abre **Containers** y confirma que `mysql`, `backend` y `frontend` estén activos.
+
+| Servicio | Dirección |
+| --- | --- |
+| Tienda | <http://localhost> |
+| Swagger | <http://localhost:8080/swagger-ui/index.html> |
+| OpenAPI JSON | <http://localhost:8080/v3/api-docs> |
+
+No necesitas instalar XAMPP. MySQL ya corre en Docker.
+
+## 2. Entrar a la tienda
+
+1. Abre <http://localhost>.
+2. Para probar como cliente, entra a **Iniciar sesión → Crear cuenta** y registra un usuario. Después inicia sesión con ese correo y contraseña.
+3. En **Productos**, agrega un artículo al carrito y completa el checkout con un resultado aprobado.
+4. Abre **Mis compras** para ver las boletas del cliente. Una compra rechazada no crea una boleta.
+
+Cuentas de demostración:
 
 - Administrador: `admin.ep3@duoc.cl` / `Admin123!`
 - Vendedor: `vendedor.ep3@duoc.cl` / `Vendedor123!`
-- Cliente: regístrate desde **Iniciar sesión → Crear cuenta**.
+- Cliente: usa las credenciales elegidas al registrarte.
 
-El administrador administra el catálogo, las categorías, los usuarios y las boletas. El vendedor solo consulta productos y órdenes. El cliente usa la tienda y puede confirmar compras con sesión iniciada.
+## 3. Probar Swagger
 
-## Qué hace la aplicación
+1. Abre Swagger y busca **POST `/api/v1/auth/login`**.
+2. Pulsa **Try it out**, ingresa el correo y contraseña de una de las cuentas anteriores y pulsa **Execute**.
+3. Una respuesta `200` indica que el inicio de sesión funcionó. El JWT queda en una cookie `HttpOnly`: no copies nada de la respuesta.
+4. En la misma pestaña, prueba un endpoint permitido al rol que inició sesión.
 
-- Navegación de tienda, filtros, detalle de producto, carrito, checkout y vistas informativas.
-- Registro e inicio de sesión con JWT en cookie HttpOnly; el backend valida los permisos de cada recurso.
-- Operaciones CRUD de productos, categorías y usuarios desde el panel ADMIN.
-- Consulta de productos y boletas desde el panel VENDEDOR, en modo lectura.
-- Checkout que revalida precios y existencias en el servidor, guarda cabecera y detalles en MySQL, y descuenta stock en una transacción.
-- Persistencia relacional para usuarios, categorías, productos, boletas y detalles.
-- Swagger/OpenAPI para explorar los contratos REST versionados en `/api/v1`.
+| Cuenta | Ejemplos de endpoints permitidos |
+| --- | --- |
+| Administrador | `GET /api/v1/users`, `GET /api/v1/products`, `GET /api/v1/boletas` |
+| Vendedor | `GET /api/v1/products`, `GET /api/v1/boletas` |
+| Cliente | `GET /api/v1/store/products`, `GET /api/v1/store/orders` |
 
-El método de pago es una demostración académica: no se conecta a un proveedor de pagos real. El carrito permanece en el navegador; las órdenes confirmadas y el inventario quedan en MySQL.
+El vendedor no puede consultar usuarios. **GET `/api/v1/users`** con sesión de vendedor responde `403 Forbidden`; es una restricción intencional. Para probarlo, inicia sesión en Swagger como administrador.
 
-## Datos y seguridad
+Si recibes `401`, vuelve a iniciar sesión en la misma pestaña. `403` significa que la sesión existe, pero el rol no tiene permiso para esa operación.
 
-Docker Compose configura MySQL y crea un volumen persistente `mysql_data`. Los usuarios iniciales se crean con contraseñas BCrypt. Configura `ADMIN_PASSWORD`, `SELLER_PASSWORD`, `JWT_SECRET`, `DB_PASSWORD` y `MYSQL_ROOT_PASSWORD` antes de desplegar en un servidor compartido.
+## 4. Revisar la base de datos
 
-Para bajar los contenedores sin borrar los datos:
+En la terminal de VS Code, dentro de la carpeta del proyecto, ejecuta:
 
 ```powershell
-docker compose down
+docker compose exec mysql mysql -utienda -p tienda_online
 ```
 
-Para volver a iniciar, usa `docker compose up`. Las variables de ejemplo y el modelo de tablas están en `backend/.env.example` y `docs/modelo_relacional.png`.
+Contraseña local: `tienda_dev_2026`. Dentro de MySQL puedes listar las tablas y revisar las boletas:
 
-## Documentos de entrega
+```sql
+SHOW TABLES;
 
-- `docs/ERS_TiendaOnline.docx`: requisitos y alcance.
-- `docs/Manual_Usuario_TiendaOnline.docx`: guía de uso.
-- `docs/Documentacion_APIs_Integracion_TiendaOnline.docx` y `.xlsx`: contratos e integración.
-- `docs/modelo_relacional.png` y `docs/arquitectura_integracion.png`: diagramas.
-- `docs/Matriz_de_Pruebas_y_Rubrica.md`: matriz para validar los requisitos de la pauta.
-- `INTEGRACION_MIL_SABORES.md`: flujo técnico y permisos.
+SELECT b.id, b.numero, b.fecha, b.total, b.estado, u.email
+FROM boleta b
+JOIN usuario u ON u.id = b.usuario_id
+ORDER BY b.id DESC;
+```
 
-La compilación del frontend y las imágenes Docker se completó correctamente. Las pruebas automatizadas no se ejecutaron en esta sesión. Antes de presentar, recorre registro/login, compra, CRUD de administrador y consulta del vendedor; documenta capturas reales en el manual.
+Escribe `exit` para salir. La [nota detallada de pruebas](docs/NOTA_PRUEBAS_LOCAL.md) contiene una consulta para ver también las líneas de cada boleta.
+
+## 5. Detener el proyecto
+
+Desde la misma carpeta, ejecuta:
+
+```powershell
+docker compose stop
+```
+
+Los contenedores se detienen y MySQL conserva los datos. Evita `docker compose down -v`, porque puede borrar el volumen de la base.
+
+## Manual de usuario
+
+El manual con las instrucciones para usar la tienda está en [docs/Manual_Usuario_TiendaOnline.docx](docs/Manual_Usuario_TiendaOnline.docx).

@@ -5,7 +5,7 @@ Esta guía explica cómo iniciar la aplicación con Docker, probar la tienda, pr
 ## 1. Iniciar la aplicación
 
 1. Abre Docker Desktop y espera a que indique que Docker está activo.
-2. Abre la carpeta `mil-sabores-ep3-review` en VS Code.
+2. Abre la carpeta del proyecto en VS Code (`projecto_semestral` si lo clonaste desde GitHub).
 3. En la terminal de VS Code ejecuta:
 
    ```powershell
