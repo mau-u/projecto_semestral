@@ -1,0 +1,47 @@
+spring:
+  application:
+    name: tienda-online-api
+  datasource:
+    url: ${DB_URL:jdbc:mysql://localhost:3306/tienda_online?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC}
+    username: ${DB_USER:tienda}
+    password: ${DB_PASSWORD:tienda_dev_2026}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+  jackson:
+    time-zone: America/Santiago
+server:
+  port: ${PORT:8080}
+  error:
+    include-message: always
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: method
+  api-docs:
+    path: /v3/api-docs
+app:
+  jwt:
+    secret: ${JWT_SECRET:DSY1104-TiendaOnline-Secret-Key-Only-For-Local-Development-2026-Change-In-Production}
+    expiration-ms: ${JWT_EXPIRATION_MS:28800000}
+  cookie:
+    secure: ${COOKIE_SECURE:false}
+    name: TIENDA_ACCESS
+  cors:
+    allowed-origin: ${FRONTEND_URL:http://localhost:5173}
+  admin:
+    name: ${ADMIN_NAME:Administrador}
+    email: ${ADMIN_EMAIL:admin.ep3@duoc.cl}
+    password: ${ADMIN_PASSWORD:Admin123!}
+  seller:
+    name: ${SELLER_NAME:Vendedor Mil Sabores}
+    email: ${SELLER_EMAIL:vendedor.ep3@duoc.cl}
+    password: ${SELLER_PASSWORD:Vendedor123!}
+logging:
+  level:
+    org.springframework.security: INFO
+    cl.dsy1104.tienda: INFO

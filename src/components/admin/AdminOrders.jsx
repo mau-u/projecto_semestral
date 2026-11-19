@@ -11,7 +11,7 @@ import {
 // COMPONENTE: ADMINISTRACIÓN DE ÓRDENES
 // ========================================
 
-export default function AdminOrders({ orders }) {
+export default function AdminOrders({ orders, onCancel }) {
   const [selected, setSelected] = useState(null);
 
   // Buscamos la orden seleccionada por su identificador
@@ -86,7 +86,7 @@ export default function AdminOrders({ orders }) {
             >
               {order.status === 'paid'
                 ? 'Pagada'
-                : 'Pago rechazado'}
+                : order.status === 'cancelled' ? 'Anulada' : 'Pago rechazado'}
             </span>
 
           </div>
@@ -287,14 +287,19 @@ export default function AdminOrders({ orders }) {
                     </td>
 
                     <td>
-                      <button
+                        <button
                         className="table-action"
                         onClick={() =>
                           setSelected(item.id)
                         }
                       >
-                        Mostrar boleta
+                          Mostrar boleta
                       </button>
+                        {item.status === 'paid' && <button className="table-action delete ms-2" onClick={async () => {
+                          if (!window.confirm(`¿Anular la boleta ${item.id} y devolver sus productos al stock?`)) return;
+                          try { await onCancel(item.backendId); setSelected(null); }
+                          catch (cancelError) { window.alert(cancelError.message || 'No se pudo anular la boleta.'); }
+                        }}>Anular</button>}
                     </td>
 
                   </tr>

@@ -1,0 +1,7 @@
+#!/usr/bin/env sh
+# Launcher simplificado: requiere Maven instalado en el equipo.
+if command -v mvn >/dev/null 2>&1; then
+  exec mvn "$@"
+fi
+echo "Maven no está instalado. Instala Apache Maven 3.9+ y vuelve a ejecutar: mvn $*" >&2
+exit 1

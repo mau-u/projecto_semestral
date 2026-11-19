@@ -1,0 +1,39 @@
+services:
+  mysql:
+    image: mysql:8.4
+    environment:
+      MYSQL_DATABASE: tienda_online
+      MYSQL_USER: tienda
+      MYSQL_PASSWORD: tienda_dev_2026
+      MYSQL_ROOT_PASSWORD: root_dev_2026
+    ports: ["3306:3306"]
+    volumes: [mysql_data:/var/lib/mysql]
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-proot_dev_2026"]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+  backend:
+    build: ./backend
+    environment:
+      DB_URL: jdbc:mysql://mysql:3306/tienda_online?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      DB_USER: tienda
+      DB_PASSWORD: tienda_dev_2026
+      JWT_SECRET: Cambia-Esta-Clave-Por-Una-De-Al-Menos-32-Caracteres-En-Produccion
+      ADMIN_NAME: Administrador Mil Sabores
+      ADMIN_EMAIL: admin.ep3@duoc.cl
+      ADMIN_PASSWORD: "Admin123!"
+      SELLER_NAME: Vendedor Mil Sabores
+      SELLER_EMAIL: vendedor.ep3@duoc.cl
+      SELLER_PASSWORD: "Vendedor123!"
+      FRONTEND_URL: http://localhost
+      COOKIE_SECURE: "false"
+    depends_on:
+      mysql: { condition: service_healthy }
+    ports: ["8080:8080"]
+  frontend:
+    build: .
+    depends_on: [backend]
+    ports: ["80:80"]
+volumes:
+  mysql_data:

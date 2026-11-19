@@ -16,15 +16,15 @@ import ProductDetailView from './views/ProductDetailView.jsx';
 import CartView from './views/CartView.jsx';
 import CheckoutView from './views/CheckoutView.jsx';
 import PaymentResultView from './views/PaymentResultView.jsx';
+import SellerView from './views/SellerView.jsx';
+import MyOrdersView from './views/MyOrdersView.jsx';
 import LoginView, { RegisterView } from './views/LoginView.jsx';
 import { AboutView, BlogView, BlogDetailView, ContactView } from './views/InfoView.jsx';
 import {
-  addCartItem, auditRepository, cartQuantity, cartRepository, cartTotal, categoriesRepository, decreaseStock,
-  getStockChanges,
-  ordersRepository, productsRepository, usersRepository,
+  addCartItem, auditRepository, cartQuantity, cartRepository, cartTotal, categoriesRepository, ordersRepository, productsRepository, usersRepository,
 } from './data/persistence.js';
 import { slugify } from './utils/format.js';
-import { calculatePromotions } from './utils/promotions.js';
+import { api, mapApiProduct, mapApiCategory, mapApiOrder } from './services/api.js';
 import { isValidChileanMobile, isValidDateNotFuture, isValidEmail, isValidName, isSyntacticallyValidEmail } from './utils/validation.js';
 
 const getRoute = () => window.location.hash.replace(/^#/, '') || '/';
@@ -44,11 +44,66 @@ export default function App() {
   const [categories, setCategories] = useState(() => categoriesRepository.list());
   const [cart, setCart] = useState(() => cartRepository.list());
   const [orders, setOrders] = useState(() => ordersRepository.list());
+  const [myOrders, setMyOrders] = useState([]);
   const [users, setUsers] = useState(() => usersRepository.list());
   const [auditEntries, setAuditEntries] = useState(() => auditRepository.list());
   const [currentUser, setCurrentUser] = useState(readSession);
   const [recentOrder, setRecentOrder] = useState(() => ordersRepository.list().at(-1) || null);
   const [notice, setNotice] = useState('');
+
+  useEffect(() => {
+    let active = true;
+    Promise.all([api.products(), api.categories()])
+      .then(([remoteProducts, remoteCategories]) => {
+        if (!active) return;
+        setProducts(remoteProducts.map(mapApiProduct));
+        setCategories(remoteCategories.map(mapApiCategory));
+      })
+      .catch((error) => {
+        console.warn('Backend no disponible; se mantienen los datos locales:', error.message);
+        if (active) setNotice('No se pudo conectar con el servidor. Se muestran datos locales.');
+      });
+    return () => { active = false; };
+  }, []);
+
+  useEffect(() => {
+    let active = true;
+    api.me().then((user) => {
+      if (!active) return;
+      const session = { id: user.id, nombre: user.nombre, name: user.nombre, email: user.email, role: String(user.rol || '').toLowerCase() };
+      setCurrentUser(session);
+      window.localStorage.setItem('mil-sabores.session.v1', JSON.stringify(session));
+    }).catch(() => {
+      if (!active) return;
+      setCurrentUser(null);
+      window.localStorage.removeItem('mil-sabores.session.v1');
+    });
+    return () => { active = false; };
+  }, []);
+
+  useEffect(() => {
+    if (!currentUser || !['admin', 'vendedor'].includes(currentUser.role)) return;
+    let active = true;
+    const requests = [api.adminProducts(), api.orders()];
+    if (currentUser.role === 'admin') requests.push(api.adminCategories(), api.users());
+    Promise.all(requests).then(([remoteProducts, remoteOrders, remoteCategories, remoteUsers]) => {
+      if (!active) return;
+      setProducts(remoteProducts.map(mapApiProduct));
+      setOrders(remoteOrders.map(mapApiOrder));
+      if (remoteCategories) setCategories(remoteCategories.map(mapApiCategory));
+      if (remoteUsers) setUsers(remoteUsers.map((user) => ({ ...user, rol: String(user.rol).toLowerCase() })));
+    }).catch((error) => {
+      if (active) setNotice(`No fue posible cargar el panel: ${error.message}`);
+    });
+    return () => { active = false; };
+  }, [currentUser?.id, currentUser?.role]);
+
+  useEffect(() => {
+    if (currentUser?.role !== 'cliente') { setMyOrders([]); return; }
+    let active = true;
+    api.myOrders().then((result) => { if (active) setMyOrders(result.map(mapApiOrder)); }).catch((error) => { if (active) setNotice(`No fue posible cargar tus compras: ${error.message}`); });
+    return () => { active = false; };
+  }, [currentUser?.id, currentUser?.role]);
 
   useEffect(() => {
     const updateRoute = () => { setRoute(getRoute()); window.scrollTo({ top: 0, behavior: 'smooth' }); };
@@ -62,15 +117,15 @@ export default function App() {
     return () => window.clearTimeout(timeout);
   }, [notice]);
 
-  const refreshProducts = () => setProducts(productsRepository.list());
-  const refreshOrders = () => setOrders(ordersRepository.list());
-  const refreshUsers = () => setUsers(usersRepository.list());
+  const refreshProducts = async () => setProducts((await api.adminProducts()).map(mapApiProduct));
+  const refreshOrders = async () => setOrders((await api.orders()).map(mapApiOrder));
+  const refreshUsers = async () => setUsers((await api.users()).map((user) => ({ ...user, rol: String(user.rol).toLowerCase() })));
   const refreshAudit = () => setAuditEntries(auditRepository.list());
   const logAudit = (type, event) => {
     auditRepository.create({ type, at: new Date().toISOString(), ...event });
     refreshAudit();
   };
-  const refreshCategories = () => setCategories(categoriesRepository.list());
+  const refreshCategories = async () => setCategories((await api.adminCategories()).map(mapApiCategory));
   const updateCart = (next) => { cartRepository.replace(next); setCart(next); };
   const addToCart = (product, quantity = 1, message = '') => {
     const requested = Number(quantity);
@@ -92,119 +147,119 @@ export default function App() {
     updateCart(next);
   };
   const removeFromCart = (line) => updateCart(cart.filter((item) => !(item.codigo === line.codigo && (item.mensaje || '') === (line.mensaje || ''))));
-  const pay = (customer, outcome) => {
+  const pay = async (customer, outcome) => {
     if (!isValidName(customer.name)) return 'El nombre debe contener solo letras y espacios.';
     if (!isSyntacticallyValidEmail(customer.email)) return 'Ingresa un correo electrónico con formato válido.';
     if (!isValidChileanMobile(customer.phone)) return 'Ingresa un celular chileno con formato +569 y 8 dígitos.';
     const birthDate = currentUser?.fechaNacimiento || currentUser?.fecha || '';
     if (birthDate && !isValidDateNotFuture(birthDate)) return 'La fecha de nacimiento registrada no es válida.';
-    const inventory = getStockChanges(cart, productsRepository.list());
-    if (inventory.error) return inventory.error;
-    const inventoryChanges = inventory.changes;
-    const shipping = customer.delivery === 'despacho' ? 2990 : 0;
-    const promotions = calculatePromotions(cart, { birthDate, email: currentUser?.email || customer.email, promoCode: customer.promoCode });
-    const createdAt = new Date().toISOString();
-    const isApproved = outcome === 'approved';
-    const status = isApproved ? 'paid' : 'rejected';
-    const auditTrail = [
-      { type: 'order.created', at: createdAt, description: 'Pedido registrado en el checkout.' },
-      ...(isApproved ? inventoryChanges.map((change) => ({ type: 'inventory.decreased', at: createdAt, ...change })) : []),
-      ...(isApproved ? promotions.discounts.map((discount) => ({ type: 'discount.applied', at: createdAt, ...discount })) : []),
-      { type: isApproved ? 'payment.approved' : 'payment.rejected', at: createdAt, description: isApproved ? 'Pago de demostración aprobado.' : 'Pago de demostración rechazado.' },
-    ];
-    const order = ordersRepository.create({
-      id: `MS-${Date.now().toString().slice(-8)}-${Math.random().toString(36).slice(2, 5).toUpperCase()}`,
-      customer: { name: customer.name.trim(), email: customer.email.trim(), phone: customer.phone.trim(), birthDate },
-      region: customer.region, commune: customer.commune, address: customer.address.trim(),
-      delivery: customer.delivery, payment: customer.payment,
-      items: cart.map((item) => ({ ...item })), subtotal: cartTotal(cart), shipping,
-      totalBeforeDiscounts: cartTotal(cart) + shipping,
-      discounts: promotions.discounts, discountTotal: promotions.discountTotal,
-      total: promotions.discountedSubtotal + shipping, status,
-      createdAt, auditTrail,
-    });
-    if (isApproved) {
-      decreaseStock(inventoryChanges, productsRepository);
-      refreshProducts();
-    }
-    logAudit('order.created', { actor: order.customer.email, actorName: order.customer.name, orderId: order.id, description: `Pedido ${order.id} registrado.`, amount: order.total, status });
-    if (isApproved) inventoryChanges.forEach((change) => logAudit('inventory.decreased', {
-      actor: order.customer.email, actorName: order.customer.name, orderId: order.id,
-      description: `${change.nombre}: ${change.stockBefore} → ${change.stockAfter} unidades.`, quantity: change.quantity, status: 'paid',
-    }));
-    if (isApproved) promotions.discounts.forEach((discount) => logAudit('discount.applied', {
-      actor: order.customer.email, actorName: order.customer.name, orderId: order.id,
-      description: `${discount.label} (${discount.code})`, amount: discount.amount, status: 'paid',
-    }));
-    logAudit(isApproved ? 'payment.approved' : 'payment.rejected', {
-      actor: order.customer.email, actorName: order.customer.name, orderId: order.id,
-      description: isApproved ? 'Pago de demostración aprobado.' : 'Pago de demostración rechazado.', amount: order.total, status,
-    });
-    setRecentOrder(order);
-    refreshOrders();
-    if (isApproved) updateCart([]);
-    window.location.hash = isApproved ? '#/pago/exito' : '#/pago/fallido';
-    return '';
-  };
-  const login = (email, password) => {
-    const normalizedEmail = email.trim().toLowerCase();
-    if (normalizedEmail === 'admin@duoc.cl' && password === '1234') {
-      const admin = { id: 'admin-demo', nombre: 'Administración Mil Sabores', name: 'Administración Mil Sabores', email: 'admin@duoc.cl', role: 'admin' };
-      setCurrentUser(admin);
-      window.localStorage.setItem('mil-sabores.session.v1', JSON.stringify(admin));
-      logAudit('user.login', { actor: admin.email, actorName: admin.nombre, description: 'Inicio de sesión administrativo.' });
-      window.location.hash = '#/admin';
+    if (!currentUser) return 'Inicia sesión o crea una cuenta para confirmar tu compra.';
+    if (outcome === 'rejected') {
+      setRecentOrder({ customer: { name: customer.name, email: customer.email }, items: cart, total: cartTotal(cart), status: 'rejected', createdAt: new Date().toISOString() });
+      window.location.hash = '#/pago/fallido';
       return '';
     }
-    const user = usersRepository.list().find((item) => item.email.toLowerCase() === normalizedEmail && item.password === password);
-    if (!user) return 'Correo o contraseña incorrectos. Revisa tus datos o crea una cuenta nueva.';
-    const session = { id: user.id, nombre: user.nombre, name: user.nombre, email: user.email, role: 'customer', fechaNacimiento: user.fechaNacimiento || '', promoCode: user.promoCode || '' };
-    setCurrentUser(session);
-    window.localStorage.setItem('mil-sabores.session.v1', JSON.stringify(session));
-    logAudit('user.login', { actor: user.email, actorName: user.nombre, description: 'Inicio de sesión de cliente.' });
-    window.location.hash = '#/';
-    return '';
+    try {
+      const created = await api.checkout({
+        items: cart.map((item) => ({ productoId: Number(item.codigo), cantidad: Number(item.cantidad) })),
+        telefono: customer.phone.trim(), direccion: customer.address.trim(), region: customer.region,
+        comuna: customer.commune, tipoEntrega: customer.delivery, metodoPago: customer.payment,
+        promoCode: customer.promoCode || '',
+      });
+      const order = mapApiOrder(created);
+      setRecentOrder(order);
+      setOrders((items) => [order, ...items]);
+      setMyOrders((items) => [order, ...items]);
+      const freshProducts = await api.products();
+      setProducts(freshProducts.map(mapApiProduct));
+      updateCart([]);
+      window.location.hash = '#/pago/exito';
+      return '';
+    } catch (error) {
+      return error.message || 'No fue posible registrar la compra.';
+    }
+  };
+  const login = async (email, password) => {
+    try {
+      const result = await api.login(email.trim().toLowerCase(), password);
+      const user = result.usuario || result.user;
+      const session = { id: user.id, nombre: user.nombre, name: user.nombre, email: user.email, fechaNacimiento: user.fechaNacimiento || '', role: String(user.rol || user.role || '').toLowerCase() };
+      setCurrentUser(session);
+      window.localStorage.setItem('mil-sabores.session.v1', JSON.stringify(session));
+      window.location.hash = session.role === 'admin' ? '#/admin' : session.role === 'vendedor' ? '#/vendedor' : '#/';
+      return '';
+    } catch (error) {
+      return error.message || 'No fue posible iniciar sesión.';
+    }
   };
   const logout = () => {
+    api.logout().catch(() => {});
     if (currentUser) logAudit('user.logout', { actor: currentUser.email, actorName: currentUser.nombre || currentUser.name, description: 'Cierre de sesión.' });
     setCurrentUser(null); window.localStorage.removeItem('mil-sabores.session.v1'); window.location.hash = '#/';
   };
-  const register = (form) => {
+  const register = async (form) => {
     const nombre = form.nombre.trim();
     const email = form.email.trim().toLowerCase();
     const fechaNacimiento = form.fechaNacimiento;
     const promoCode = form.promoCode.trim().toUpperCase();
-    if (!isValidName(nombre)) return { error: 'El nombre debe contener solo letras y espacios, con un máximo de 100 caracteres.' };
+    if (!isValidName(nombre)) return { error: 'El nombre debe contener solo letras y espacios.' };
     if (!isValidEmail(email)) return { error: 'Ingresa un correo válido @duoc.cl, @profesor.duoc.cl o @gmail.com.' };
     if (!isValidDateNotFuture(fechaNacimiento)) return { error: 'La fecha de nacimiento debe ser válida y no puede estar en el futuro.' };
-    if (form.password.length < 4 || form.password.length > 10) return { error: 'La contraseña debe tener entre 4 y 10 caracteres.' };
+    if (form.password.length < 8 || form.password.length > 72) return { error: 'La contraseña debe tener entre 8 y 72 caracteres para cumplir la política de seguridad.' };
     if (promoCode && promoCode !== 'FELICES50') return { error: 'El código promocional no es válido. Prueba con FELICES50.' };
     try {
-      const user = usersRepository.create({ id: email, nombre, email, fechaNacimiento, password: form.password, promoCode, rol: 'Cliente' });
-      refreshUsers();
-      const session = { id: user.id, nombre: user.nombre, name: user.nombre, email: user.email, role: 'customer', fechaNacimiento: user.fechaNacimiento, promoCode: user.promoCode };
+      await api.register({ nombre, email, password: form.password, fechaNacimiento });
+      const loginResult = await api.login(email, form.password);
+      const user = loginResult.usuario || loginResult.user;
+      const session = { id: user.id, nombre: user.nombre, name: user.nombre, email: user.email, role: String(user.rol || user.role || 'cliente').toLowerCase(), fechaNacimiento: user.fechaNacimiento || fechaNacimiento, promoCode };
       setCurrentUser(session);
       window.localStorage.setItem('mil-sabores.session.v1', JSON.stringify(session));
-      logAudit('user.registered', { actor: user.email, actorName: user.nombre, description: 'Cuenta de cliente creada correctamente.' });
-      setNotice(`Cuenta de ${user.nombre} creada en esta demostración.`);
+      setNotice(`Cuenta de ${nombre} creada correctamente.`);
       window.location.hash = '#/';
       return { message: 'Cuenta creada correctamente. Iniciaste sesión.' };
-    } catch (error) { return { error: error.message }; }
+    } catch (error) {
+      return { error: error.message || 'No fue posible crear la cuenta.' };
+    }
   };
-  const saveProduct = (product, editingCode) => {
-    if (editingCode) productsRepository.update(editingCode, product);
-    else productsRepository.create(product);
-    refreshProducts();
+  const saveProduct = async (product, editingCode) => {
+    const category = categories.find((item) => item.nombre === product.categoria);
+    if (!category) throw new Error('Selecciona una categoría válida.');
+    const payload = {
+      nombre: product.nombre,
+      descripcion: product.descripcion || '',
+      precio: Number(product.precio),
+      stock: Number(product.stock),
+      imagenUrl: product.imagen || '',
+      categoriaId: Number(category.id),
+      activo: true,
+    };
+    if (editingCode) await api.updateProduct(Number(editingCode), payload);
+    else await api.createProduct(payload);
+    await refreshProducts();
   };
-  const deleteProduct = (code) => { productsRepository.remove(code); refreshProducts(); };
-  const createCategory = (category) => {
-    const id = slugify(category.nombre);
-    if (!id) throw new Error('Escribe un nombre de categoría válido.');
-    categoriesRepository.create({ ...category, id });
-    refreshCategories();
+  const deleteProduct = async (code) => {
+    await api.deleteProduct(Number(code));
+    await refreshProducts();
   };
-  const deleteCategory = (id) => { categoriesRepository.remove(id); refreshCategories(); };
-  const editUser = (id, changes) => { usersRepository.update(id, changes); refreshUsers(); };
+  const createCategory = async (category) => {
+    if (!category.nombre.trim()) throw new Error('Escribe un nombre de categoría válido.');
+    await api.createCategory(category);
+    await refreshCategories();
+  };
+  const deleteCategory = async (id) => { await api.deleteCategory(Number(id)); await refreshCategories(); };
+  const editUser = async (id, changes) => {
+    const target = users.find((user) => user.id === id);
+    if (!target) throw new Error('No se encontró el usuario.');
+    await api.updateUser(id, { nombre: changes.nombre, email: target.email, rol: String(changes.rol || target.rol).toUpperCase(), activo: target.activo });
+    await refreshUsers();
+  };
+  const createUser = async (data) => { await api.createUser(data); await refreshUsers(); };
+  const deactivateUser = async (id) => { await api.deleteUser(id); await refreshUsers(); };
+  const cancelOrder = async (id) => {
+    await api.cancelOrder(id);
+    await refreshOrders();
+    setNotice('Boleta anulada y stock devuelto al inventario.');
+  };
 
   const openProduct = (product) => { window.location.hash = `#/producto/${encodeURIComponent(product.codigo)}`; };
   const path = route.split('?')[0];
@@ -225,7 +280,9 @@ export default function App() {
   else if (path === '/ofertas') view = <CatalogView products={products} categories={categories} onAdd={addToCart} onView={openProduct} title="Ofertas de la semana" offersOnly />;
   else if (path.startsWith('/producto/')) view = <ProductDetailView product={selectedProduct} onAdd={addToCart} />;
   else if (path === '/carrito') view = <CartView cart={cart} onQuantity={changeQuantity} onRemove={removeFromCart} />;
+  else if (path === '/mis-compras') view = currentUser?.role === 'cliente' ? <MyOrdersView orders={myOrders} /> : <AdminAccess />;
   else if (path === '/checkout') view = <CheckoutView cart={cart} onPay={pay} currentUser={currentUser} />;
+  else if (path === '/vendedor') view = currentUser?.role === 'vendedor' ? <SellerView products={products} orders={orders} /> : <AdminAccess />;
   else if (path === '/pago/exito') view = <PaymentResultView order={recentOrder?.status === 'paid' ? recentOrder : null} successful />;
   else if (path === '/pago/fallido') view = <PaymentResultView order={recentOrder?.status === 'rejected' ? recentOrder : null} successful={false} />;
   else if (path === '/login') view = <LoginView onLogin={login} />;
@@ -243,8 +300,8 @@ export default function App() {
       else if (section === 'productos') content = <AdminProducts products={products} categories={categories} onSave={saveProduct} onDelete={deleteProduct} />;
       else if (section === 'criticos') content = <AdminProducts products={products} categories={categories} onSave={saveProduct} onDelete={deleteProduct} criticalOnly />;
       else if (section === 'categorias') content = <AdminCategories categories={categories} products={products} onCreate={createCategory} onDelete={deleteCategory} />;
-      else if (section === 'ordenes') content = <AdminOrders orders={orders} />;
-      else if (section === 'usuarios') content = <AdminUsers users={users} orders={orders} onUpdate={editUser} />;
+      else if (section === 'ordenes') content = <AdminOrders orders={orders} onCancel={cancelOrder} />;
+      else if (section === 'usuarios') content = <AdminUsers users={users} orders={orders} onUpdate={editUser} onCreate={createUser} onDelete={deactivateUser} />;
       else if (section === 'auditoria') content = <AdminAudit entries={auditEntries} />;
       else if (section === 'reportes') content = <AdminReports products={products} orders={orders} />;
       else content = <AdminProfile user={currentUser} />;
@@ -252,5 +309,6 @@ export default function App() {
     }
   } else view = <HomeView products={products} categories={categories} onAdd={addToCart} onView={openProduct} onCategory={(name) => { window.location.hash = `#/categoria/${slugify(name)}`; }} />;
 
-  return <><Header cartCount={cartQuantity(cart)} currentUser={currentUser} onLogout={logout} />{view}{!adminRoute && <Footer />}{notice && <div className="toast-note" role="status"><span>✓</span>{notice}</div>}</>;
+  const dashboardRoute = adminRoute || path === '/vendedor';
+  return <><Header cartCount={cartQuantity(cart)} currentUser={currentUser} onLogout={logout} />{view}{!dashboardRoute && <Footer />}{notice && <div className="toast-note" role="status"><span>✓</span>{notice}</div>}</>;
 }

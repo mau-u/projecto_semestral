@@ -26,8 +26,10 @@ export default function Header({ cartCount = 0, currentUser, onLogout }) {
               {links.map(([label, href]) => <a key={href} className="nav-link" href={href} onClick={closeMenu}>{label}</a>)}
               {currentUser?.role === 'admin'
                 ? <><a className="nav-link admin-nav-link" href="#/admin">Panel admin</a><button className="btn btn-link nav-link" onClick={() => { onLogout?.(); closeMenu(); }}>Salir</button></>
+                : currentUser?.role === 'vendedor'
+                  ? <><a className="nav-link admin-nav-link" href="#/vendedor">Panel vendedor</a><button className="btn btn-link nav-link" onClick={() => { onLogout?.(); closeMenu(); }}>Salir</button></>
                 : currentUser
-                  ? <><span className="nav-link customer-greeting">Hola, {currentUser.nombre || currentUser.name}</span><button className="btn btn-link nav-link" onClick={() => { onLogout?.(); closeMenu(); }}>Salir</button></>
+                  ? <><a className="nav-link" href="#/mis-compras">Mis compras</a><span className="nav-link customer-greeting">Hola, {currentUser.nombre || currentUser.name}</span><button className="btn btn-link nav-link" onClick={() => { onLogout?.(); closeMenu(); }}>Salir</button></>
                   : <a className="nav-link" href="#/login" onClick={closeMenu}>Iniciar sesión</a>}
               <a className="btn btn-brand cart-nav ms-lg-2" href="#/carrito" onClick={closeMenu} aria-label={`Carrito, ${cartCount} productos`}>
                 <span aria-hidden="true">♧</span> Carrito <span className="cart-badge">{cartCount}</span>

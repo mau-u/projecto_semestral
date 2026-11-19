@@ -1,0 +1,54 @@
+### Verificar que el backend responde (catálogo público)
+GET http://localhost:8080/api/v1/store/products
+Accept: application/json
+
+### Catálogo público
+GET http://localhost:8080/api/v1/store/products
+Accept: application/json
+
+### Categorías públicas
+GET http://localhost:8080/api/v1/store/categories
+Accept: application/json
+
+### Registrar cliente (cambiar correo si ya existe)
+POST http://localhost:8080/api/v1/auth/register
+Content-Type: application/json
+
+{
+  "nombre": "Cliente de Prueba",
+  "email": "cliente.prueba@example.com",
+  "password": "Cliente123!"
+}
+
+### Login administrador (el REST Client conserva cookies entre solicitudes)
+POST http://localhost:8080/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@tienda.local",
+  "password": "Admin123!"
+}
+
+### Usuario autenticado actual
+GET http://localhost:8080/api/v1/auth/me
+
+### Renovar JWT antes de su expiración (requiere cookie vigente)
+POST http://localhost:8080/api/v1/auth/refresh
+
+### Listar usuarios (solo ADMIN)
+GET http://localhost:8080/api/v1/users
+
+### Listar productos de administración (ADMIN o VENDEDOR)
+GET http://localhost:8080/api/v1/products
+
+### Crear categoría (solo ADMIN)
+POST http://localhost:8080/api/v1/categories
+Content-Type: application/json
+
+{
+  "nombre": "Accesorios",
+  "descripcion": "Accesorios de demostración"
+}
+
+### Logout
+POST http://localhost:8080/api/v1/auth/logout

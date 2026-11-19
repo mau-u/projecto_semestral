@@ -30,7 +30,7 @@ export default function LoginView({ onLogin }) {
         <div className="demo-credentials">
           <strong>Cuenta demo de administración</strong>
           <span>admin@duoc.cl</span>
-          <span>Contraseña: 1234</span>
+          <span>Contraseña: Admin123!</span>
         </div>
 
 
@@ -39,9 +39,8 @@ export default function LoginView({ onLogin }) {
           onSubmit={(event) => {
             event.preventDefault();
 
-            const message = onLogin(email, password);
-
-            setError(message || '');
+            setError('');
+            Promise.resolve(onLogin(email, password)).then((message) => setError(message || '')).catch((error) => setError(error.message || 'No fue posible iniciar sesión.'));
           }}
         >
           <label className="form-label">
@@ -104,7 +103,7 @@ export default function LoginView({ onLogin }) {
         </p>
 
         <p className="auth-footnote">
-          La autenticación es una simulación local para fines académicos.
+          La autenticación se valida mediante el backend Spring Boot y una cookie JWT HttpOnly.
         </p>
       </section>
     </main>
@@ -150,18 +149,12 @@ export function RegisterView({ onRegister }) {
   const submit = (event) => {
     event.preventDefault();
 
-    const result = onRegister(form);
-
-    if (result?.error) {
-      setError(result.error);
-      setMessage('');
-    } else {
-      setMessage(
-        result?.message || 'Cuenta creada correctamente.'
-      );
-
-      setError('');
-    }
+    setError('');
+    setMessage('');
+    Promise.resolve(onRegister(form)).then((result) => {
+      if (result?.error) setError(result.error);
+      else setMessage(result?.message || 'Cuenta creada correctamente.');
+    }).catch((error) => setError(error.message || 'No fue posible completar el registro.'));
   };
 
 
@@ -268,7 +261,7 @@ export function RegisterView({ onRegister }) {
           </label>
 
           <small className="field-hint">
-            Debe tener entre 4 y 10 caracteres.
+            Debe tener entre 8 y 72 caracteres.
           </small>
 
 

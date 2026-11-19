@@ -21,11 +21,11 @@ export default function AdminCategories({
   // CREAR UNA NUEVA CATEGORÍA
   // ========================================
 
-  const submit = (event) => {
+  const submit = async (event) => {
     event.preventDefault();
 
     try {
-      onCreate({
+      await onCreate({
         nombre: nombre.trim(),
         descripcion: descripcion.trim()
       });
@@ -181,7 +181,10 @@ export default function AdminCategories({
                       ? 'Mueve o elimina sus productos antes de borrar esta categoría.'
                       : 'Eliminar categoría'
                   }
-                  onClick={() => onDelete(category.id)}
+                  onClick={async () => {
+                    try { await onDelete(category.id); setError(''); }
+                    catch (deleteError) { setError(deleteError.message || 'No se pudo eliminar la categoría.'); }
+                  }}
                 >
                   {usage > 0
                     ? 'En uso'

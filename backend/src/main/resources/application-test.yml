@@ -1,0 +1,25 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:tienda_test;MODE=MySQL;DB_CLOSE_DELAY=-1;DATABASE_TO_LOWER=TRUE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    open-in-view: false
+  sql:
+    init:
+      mode: never
+app:
+  jwt:
+    secret: Test-Secret-Key-For-DSY1104-Only-At-Least-32-Characters
+    expiration-ms: 3600000
+  cookie:
+    secure: false
+  cors:
+    allowed-origin: http://localhost:5173
+  admin:
+    name: Administrador Test
+    email: admin@test.local
+    password: Admin123!

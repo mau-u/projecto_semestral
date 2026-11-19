@@ -1,0 +1,22 @@
+DSY1104 — Evaluación Parcial 3
+Proyecto: Mil Sabores
+
+Este ZIP reúne el proyecto original del estudiante y las incorporaciones de la evaluación:
+- Frontend React original conservado.
+- Backend Spring Boot + MySQL.
+- Docker Compose.
+- Cliente REST para catálogo y autenticación.
+- ERS, manual de usuario, documentación API e integración, planilla de endpoints, diagramas, matriz de pruebas y guion de presentación.
+
+Inicio rápido:
+1) Extraer el ZIP.
+2) Abrir PowerShell en la carpeta raíz.
+3) Ejecutar: docker compose up --build
+4) Abrir http://localhost
+
+Credenciales demo backend:
+admin@duoc.cl / Admin123!
+
+ATENCIÓN:
+La conexión real de catálogo, categorías y autenticación está incorporada.
+El checkout, pago y algunas funciones administrativas del proyecto original aún conservan persistencia local. Revisar INTEGRACION_MIL_SABORES.md y completar esos flujos antes de afirmar que toda la aplicación está integrada y antes de entregar.

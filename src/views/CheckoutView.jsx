@@ -73,6 +73,7 @@ export default function CheckoutView({
   }));
 
   const [error, setError] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
 
   const setField = (event) => {
@@ -100,7 +101,8 @@ export default function CheckoutView({
   };
 
 
-  const submit = (outcome) => {
+  const submit = async (outcome) => {
+    if (submitting) return;
     if (!cart.length) {
       setError(
         'Agrega al menos un producto antes de continuar.'
@@ -153,7 +155,8 @@ export default function CheckoutView({
       return;
     }
 
-    const result = onPay(
+    setSubmitting(true);
+    const result = await onPay(
       {
         ...form,
         name: form.name.trim(),
@@ -168,9 +171,8 @@ export default function CheckoutView({
       outcome
     );
 
-    if (result) {
-      setError(result);
-    }
+    if (result) setError(result);
+    setSubmitting(false);
   };
 
 
@@ -240,7 +242,7 @@ export default function CheckoutView({
           className="checkout-form"
           onSubmit={(event) => {
             event.preventDefault();
-            submit('approved');
+            void submit('approved');
           }}
           noValidate
         >
@@ -529,14 +531,16 @@ export default function CheckoutView({
             <button
               className="btn btn-brand btn-lg"
               type="submit"
+              disabled={submitting}
             >
-              Simular pago aprobado <span>→</span>
+              {submitting ? 'Registrando compra…' : 'Confirmar compra'} <span>→</span>
             </button>
 
             <button
               className="btn btn-outline-brand"
               type="button"
-              onClick={() => submit('rejected')}
+              onClick={() => void submit('rejected')}
+              disabled={submitting}
             >
               Probar pago rechazado
             </button>

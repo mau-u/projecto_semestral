@@ -110,7 +110,7 @@ export default function AdminProducts({
   // GUARDAR O ACTUALIZAR UN PRODUCTO
   // ========================================
 
-  const submit = (event) => {
+  const submit = async (event) => {
     event.preventDefault();
 
 
@@ -143,7 +143,7 @@ export default function AdminProducts({
 
     // Intentamos guardar el producto
     try {
-      onSave(
+      await onSave(
         {
           ...form,
           codigo: form.codigo.trim().toUpperCase(),
@@ -559,13 +559,19 @@ export default function AdminProducts({
                       <button
                         className="table-action delete"
                         type="button"
-                        onClick={() => {
+                        onClick={async () => {
                           if (
                             window.confirm(
                               `¿Eliminar ${product.nombre} del catálogo?`
                             )
                           ) {
-                            onDelete(product.codigo);
+                            try {
+                              await onDelete(product.codigo);
+                              setMessage('Producto eliminado correctamente.');
+                              setError('');
+                            } catch (deleteError) {
+                              setError(deleteError.message || 'No se pudo eliminar el producto.');
+                            }
                           }
                         }}
                       >

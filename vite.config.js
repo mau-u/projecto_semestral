@@ -3,5 +3,6 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   plugins: [react()],
-  base: '/projecto_semestral/',
+  base: '/',
+  server: { proxy: { '/api': { target: 'http://localhost:8080', changeOrigin: true } } },
 });
